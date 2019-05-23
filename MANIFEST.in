@@ -1,0 +1,3 @@
+include LICENSE
+include ads2bibdesk.cfg.default
+recursive-include service/Add?to?BibDesk.workflow *

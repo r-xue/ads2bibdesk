@@ -1,0 +1,22 @@
+#
+#   This is the default preference file
+#   edit and copy to ~/.ads/
+#      
+#   ADS API key can be set by replacing "dev_key"
+#   or
+#   Add the key to ~/.ads/dev_key
+#   
+
+[default]
+ads_mirror = ui.adsabs.hardvard.edu
+ads_token = dev_key
+
+[proxy]
+ssh_user = None
+ssh_server = None
+ssh_port = 22
+
+[options]
+download_pdf = True
+pdf_reader = None
+debug = False
