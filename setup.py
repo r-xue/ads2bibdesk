@@ -93,7 +93,6 @@ class InstallCommand(install):
             os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)        
         
 
-
 setup(
     name='ads2bibdesk',
     version=get_version(),

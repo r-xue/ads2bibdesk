@@ -82,18 +82,16 @@ the ads python package's instruction)
     logging.debug("ADS to BibDesk version {}".format(__version__))
     logging.debug("Python: {}".format(sys.version))        
     
-    article_status=process_articles(args ,prefs)
+    article_status=process_article(args ,prefs)
 
 
-def process_articles(args, prefs, delay=15):
+def process_article(args, prefs, delay=15):
     """
     """
-    
-    article_identifiers = args.article_identifier
 
     bibdesk = BibDesk()
     
-    article_status=process_token(article_identifiers, prefs, bibdesk)
+    article_status=process_token(args.article_identifier, prefs, bibdesk)
     
     bibdesk.app.dealloc()
     
@@ -105,7 +103,7 @@ def process_token(article_identifier, prefs, bibdesk):
 
     Parameters
     ----------
-    article_identifier : str
+    article_bibcode : str
         Any user-supplied `str` token.
     prefs : :class:`Preferences`
         A `Preferences` instance.
@@ -134,8 +132,8 @@ def process_token(article_identifier, prefs, bibdesk):
             ' Zero or Multiple ADS entries for the article identifiier: {}'.format(article_identifier))
         logging.debug('Matching Number: {}'.format(len(ads_articles)))
         notify('Found Zero or Multiple ADS antries for ',
-                article_identifier, ' No update in BibDesk')
-        logging.info("Found Zero or Multiple ADS antries for {}".format(article_identifiern))
+                article_bibcode, ' No update in BibDesk')
+        logging.info("Found Zero or Multiple ADS antries for {}".format(article_identifier))
         logging.info("No update in BibDesk")
 
         return False
@@ -150,8 +148,9 @@ def process_token(article_identifier, prefs, bibdesk):
         logging.debug('process_token: >>>{}'.format(k))
         logging.debug('process_token:    {}'.format(v))
 
-        
-    pdf_filename,pdf_status = process_pdf(article_identifier,
+    
+    article_bibcode=ads_article.bibcode
+    pdf_filename,pdf_status = process_pdf(article_bibcode,
                                           prefs=prefs,
                                           gateway_url="https://ui.adsabs.harvard.edu/link_gateway")     
     
@@ -222,9 +221,8 @@ def process_token(article_identifier, prefs, bibdesk):
     urls = bibdesk('value of fields whose name ends with "url"',
                    pub, strlist=True)
     
-    
-    if  'arXiv' in article_identifier:
-        gateway = get_gateway(article_identifier)
+    if  'arXiv' in article_bibcode:
+        gateway = get_gateway(article_bibcode)
         urls+=[gateway['eprint_html']]
     
     urlspub = bibdesk('linked URLs', pub, strlist=True)
@@ -258,7 +256,7 @@ def process_token(article_identifier, prefs, bibdesk):
     return True
 
     
-def process_pdf(article_identifier,
+def process_pdf(article_bibcode,
                 prefs=None,
                 fulltext_sources=['pub','eprint','ads'],
                 gateway_url="https://ui.adsabs.harvard.edu/link_gateway"):
@@ -268,16 +266,13 @@ def process_pdf(article_identifier,
         https://ui.adsabs.harvard.edu/link_gateway/{bibcode}/{PUB/EPRINT/ADS}_{PDF/HTML}        
     """
     
-    ads_gateway=get_gateway(article_identifier)
-    if  'arXiv' in article_identifier:
-        pdf_url=ads_gateway['eprint_pdf']
-    else:
-        pdf_url=ads_gateway['pub_pdf']
+    article_gateway=get_gateway(article_bibcode)
+
     
     pdf_status=False
     for fulltext_source in fulltext_sources:
         
-        pdf_url = ads_gateway[fulltext_source+'_pdf']
+        pdf_url = article_gateway[fulltext_source+'_pdf']
         logging.debug("process_pdf_local: {}".format(pdf_url))
         response = requests.get(pdf_url,allow_redirects=True,
                             headers={'User-Agent':
@@ -314,7 +309,7 @@ def get_pdf_ssh(pdf_url,pdf_filename,user,server,port=22):
     
     return
 
-def get_gateway(article_identifier,
+def get_gateway(article_bibcode,
                 gateway_url="https://ui.adsabs.harvard.edu/link_gateway"):
     """
     fulltext_source='PUB' or 'EPRINT'
@@ -325,14 +320,14 @@ def get_gateway(article_identifier,
         
     ads_gateway={}
     #   from publishers
-    ads_gateway['pub_pdf'] = gateway_url+'/'+article_identifier+'/PUB_PDF'
-    ads_gateway['pub_html'] = gateway_url+'/'+article_identifier+'/PUB_HTML'
+    ads_gateway['pub_pdf'] = gateway_url+'/'+article_bibcode+'/PUB_PDF'
+    ads_gateway['pub_html'] = gateway_url+'/'+article_bibcode+'/PUB_HTML'
     #   from arxiv
-    ads_gateway['eprint_pdf'] = gateway_url+'/'+article_identifier+'/EPRINT_PDF'
-    ads_gateway['eprint_html'] = gateway_url+'/'+article_identifier+'/EPRINT_HTML'
+    ads_gateway['eprint_pdf'] = gateway_url+'/'+article_bibcode+'/EPRINT_PDF'
+    ads_gateway['eprint_html'] = gateway_url+'/'+article_bibcode+'/EPRINT_HTML'
     #   from ads scan
-    ads_gateway['ads_pdf'] = gateway_url+'/'+article_identifier+'/ADS_PDF'
-    ads_gateway['ads_html'] = gateway_url+'/'+article_identifier+'/ADS_SCAN'
+    ads_gateway['ads_pdf'] = gateway_url+'/'+article_bibcode+'/ADS_PDF'
+    ads_gateway['ads_html'] = gateway_url+'/'+article_bibcode+'/ADS_SCAN'
         
     return ads_gateway
 
