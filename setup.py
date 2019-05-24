@@ -84,12 +84,13 @@ class InstallCommand(install):
                 with open(workflow, 'wb') as fp:
                     plistlib.dump(pl, fp)
     
-                logger.info("Saving {0}".format(workflow))
+                logger.info('Saving "{}"'.format(workflow))
             logger.info("Completed ADS to BibDesk build step")            
             
             workflow_ads2bibdesk=rel_path(os.path.join("service","Add to BibDesk.workflow"))
             workflow_ads2bibdesk=workflow_ads2bibdesk.replace(' ','\ ')
             workflow_system='~/Library/Services/'
+            logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
             os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)        
         
 
@@ -113,7 +114,7 @@ setup(
                  "Topic :: Scientific/Engineering :: Astronomy"],
     
     py_modules=['ads2bibdesk'],
-    package_data={'':['ads2bibdesk.cfg.default']},
+    include_package_data=True,
     entry_points={'console_scripts': ['ads2bibdesk = ads2bibdesk:main']},
     python_requires='>=3.6, <4',
     install_requires=['ads','requests','pyobjc'],

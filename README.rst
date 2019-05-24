@@ -10,8 +10,8 @@ The MacOS workflow and app building process were updated.
 The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_. 
 
 Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key (i.e., token), per the new NASA/ADS policy. 
-The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg``.
-Following the Python/ads package's instruction, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
+The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
+Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
 
 
 * Repo: https://github.com/r-xue/ads2bibdesk

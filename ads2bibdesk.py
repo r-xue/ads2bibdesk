@@ -14,8 +14,7 @@ import ads
 import requests
 import AppKit       #   from pyobjc
 
-__version__ = '0.1.dev2'
-
+__version__ = '0.1.dev4'
 
 def main():
     """
@@ -127,7 +126,13 @@ def process_token(article_identifier, prefs, bibdesk):
                               fl=['author','first_author',
                                   'bibcode','identifier','alternate_bibcode','id',
                                   'year', 'title','abstract'])
-    ads_articles = list(ads_query)
+    try:
+        ads_articles = list(ads_query)
+    except:
+        logging.info("API response error, Likely no authorized key is provided!")
+        notify('API response error', 'key:'+prefs['default']['ads_token'], 
+               'Likely no authorized key is provided!')
+        return False
     
     if  len(ads_articles)!=1:
         logging.debug(
@@ -143,9 +148,11 @@ def process_token(article_identifier, prefs, bibdesk):
     ads_article = ads_articles[0]
     ads_bibtex = ads.ExportQuery(bibcodes=ads_article.bibcode,format='bibtex').execute()
 
-    logging.debug("process_token: API limits: {}".format(ads_query.response.get_ratelimits()))
-    logging.debug("process_token: ads_bibtex: {}".format(ads_bibtex))
-    
+    logging.debug("process_token: >>>API limits")
+    logging.debug("process_token:    {}".format(ads_query.response.get_ratelimits()))
+    logging.debug("process_token: >>>ads_bibtex")
+    logging.debug("process_token:    {}".format(ads_bibtex))
+
     for k, v in ads_article.items():
         logging.debug('process_token: >>>{}'.format(k))
         logging.debug('process_token:    {}'.format(v))
@@ -153,10 +160,16 @@ def process_token(article_identifier, prefs, bibdesk):
     article_bibcode=ads_article.bibcode
     gateway_url='https://'+prefs['default']['ads_mirror']+'/link_gateway'
     #   https://ui.adsabs.harvard.edu/link_gateway by default
-    pdf_filename,pdf_status = process_pdf(article_bibcode,
-                                          prefs=prefs,
-                                          gateway_url=gateway_url)     
     
+    if  'true' in prefs['options']['download_pdf'].lower():
+        pdf_filename,pdf_status = process_pdf(article_bibcode,
+                                              prefs=prefs,
+                                              gateway_url=gateway_url)     
+    else:
+        pdf_filename='.null'
+
+        
+        
     kept_pdfs = []
     kept_fields = {}
     kept_groups=[]    
@@ -535,10 +548,22 @@ class Preferences(object):
         """
         
         prefs = ConfigParser(interpolation=ExtendedInterpolation())
+        prefs.read_string("""
         
-        this_dir, this_filename = os.path.split(__file__)
-        prefs_default_path = os.path.join(this_dir, "ads2bibdesk.cfg.default")
-        prefs.read(prefs_default_path)
+            [default]
+            ads_mirror = ui.adsabs.harvard.edu
+            ads_token = dev_key
+            
+            [proxy]
+            ssh_user = None
+            ssh_server = None
+            ssh_port = 22
+            
+            [options]
+            download_pdf = True
+            debug = False            
+                          
+            """)
         prefs_dir=os.path.dirname(self.prefs_path)
         
         if  not os.path.exists(prefs_dir):
