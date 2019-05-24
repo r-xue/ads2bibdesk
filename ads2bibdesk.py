@@ -14,7 +14,7 @@ import ads
 import requests
 import AppKit       #   from pyobjc
 
-__version__ = '0.1.dev1'
+__version__ = '0.1.dev2'
 
 
 def main():
@@ -31,7 +31,8 @@ to your BibDesk database using the ADS Developer API
 ads2bibdesk accepts many kinds of article tokens:
  - the ADS bibcode of an article (e.g. 1998ApJ...500..525S, 2019arXiv190404507R), or
  - the arXiv identifier of an article (e.g. 0911.4956).
-(Example: `ads2bibdesk 2019arXiv190404507R`)
+ - doi of an article (e.g. 10.3847/1538-4357/aafd37)
+(Example: `ads2bibdesk "2019arXiv190404507R"`)
 
 Different from J.Sick's original `ads_bibdesk` or `adsbibdesk`, ads2bibdesk require the user
 to specify a personal ADS API key (per the new ADS policy). The metadata query will be performed
@@ -55,7 +56,8 @@ the ads python package's instruction)
     parser.add_argument('article_identifier',type=str,
                         help="""A required article identifier, which could be:
   - the ADS bibcode of an article, or
-  - the arXiv id of an article""")
+  - the arXiv id of an article, or
+  - article doi """)
 
     args = parser.parse_args()
     
@@ -85,7 +87,7 @@ the ads python package's instruction)
     article_status=process_article(args ,prefs)
 
 
-def process_article(args, prefs, delay=15):
+def process_article(args, prefs):
     """
     """
 
@@ -120,7 +122,7 @@ def process_token(article_identifier, prefs, bibdesk):
     
     if  'dev_key' not in prefs['default']['ads_token']:
         ads.config.token = prefs['default']['ads_token']
-    #
+    
     ads_query = ads.SearchQuery(identifier=article_identifier,
                               fl=['author','first_author',
                                   'bibcode','identifier','alternate_bibcode','id',
@@ -147,12 +149,13 @@ def process_token(article_identifier, prefs, bibdesk):
     for k, v in ads_article.items():
         logging.debug('process_token: >>>{}'.format(k))
         logging.debug('process_token:    {}'.format(v))
-
     
     article_bibcode=ads_article.bibcode
+    gateway_url='https://'+prefs['default']['ads_mirror']+'/link_gateway'
+    #   https://ui.adsabs.harvard.edu/link_gateway by default
     pdf_filename,pdf_status = process_pdf(article_bibcode,
                                           prefs=prefs,
-                                          gateway_url="https://ui.adsabs.harvard.edu/link_gateway")     
+                                          gateway_url=gateway_url)     
     
     kept_pdfs = []
     kept_fields = {}
@@ -220,10 +223,9 @@ def process_token(article_identifier, prefs, bibdesk):
     # add URLs as linked URL if not there yet
     urls = bibdesk('value of fields whose name ends with "url"',
                    pub, strlist=True)
-    
-    if  'arXiv' in article_bibcode:
-        gateway = get_gateway(article_bibcode)
-        urls+=[gateway['eprint_html']]
+    if  'arxiv' in article_bibcode.lower():
+        article_gateway = get_article_gateway(article_bibcode,gateway_url=gateway_url)
+        urls+=[article_gateway['eprint_html']]
     
     urlspub = bibdesk('linked URLs', pub, strlist=True)
 
@@ -266,32 +268,41 @@ def process_pdf(article_bibcode,
         https://ui.adsabs.harvard.edu/link_gateway/{bibcode}/{PUB/EPRINT/ADS}_{PDF/HTML}        
     """
     
-    article_gateway=get_gateway(article_bibcode)
+    article_gateway=get_article_gateway(article_bibcode,gateway_url=gateway_url)
 
-    
     pdf_status=False
     for fulltext_source in fulltext_sources:
         
         pdf_url = article_gateway[fulltext_source+'_pdf']
         logging.debug("process_pdf_local: {}".format(pdf_url))
+        
         response = requests.get(pdf_url,allow_redirects=True,
                             headers={'User-Agent':
                                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
                                 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'})
-        fd, pdf_filename = tempfile.mkstemp(suffix='.pdf')
-        os.fdopen(fd,'wb').write(response.content)
         
-        if  prefs['proxy']['ssh_user']!='None' and prefs['proxy']['ssh_server']!='None':
-            logging.debug("process_pdf_proxy: {}".format(pdf_url))
-            get_pdf_ssh(pdf_url,pdf_filename,prefs['proxy']['ssh_user'],prefs['proxy']['ssh_server'],port=prefs['proxy']['ssh_port'])
+        fd, pdf_filename = tempfile.mkstemp(suffix='.pdf')
+        if  response.status_code!=404 and response.status_code!=403:
+            os.fdopen(fd,'wb').write(response.content)
         
         if  'PDF document' in get_filetype(pdf_filename):
             pdf_status=True
-            break
+            break        
+        
+        if  'pub' in fulltext_source and \
+            prefs['proxy']['ssh_user']!='None' and prefs['proxy']['ssh_server']!='None':
+            logging.debug("process_pdf_proxy: {}".format(pdf_url))
+            process_pdf_proxy(pdf_url,pdf_filename,
+                              prefs['proxy']['ssh_user'],
+                              prefs['proxy']['ssh_server'],
+                              port=prefs['proxy']['ssh_port'])
+            if  'PDF document' in get_filetype(pdf_filename):
+                pdf_status=True
+                break
         
     return pdf_filename, pdf_status
 
-def get_pdf_ssh(pdf_url,pdf_filename,user,server,port=22):
+def process_pdf_proxy(pdf_url,pdf_filename,user,server,port=22):
     
     cmd1 = 'ssh -p {} {}@{} \"touch /tmp/adsbibdesk.pdf; '.format(port,user,server)
     cmd1 += 'wget -O /tmp/adsbibdesk.pdf '
@@ -300,16 +311,16 @@ def get_pdf_ssh(pdf_url,pdf_filename,user,server,port=22):
     cmd1 += '(KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36\\" \\"{}\\"\"'.format(pdf_url)
     cmd2 = 'scp -P {} -q {}@{}:/tmp/adsbibdesk.pdf {}'.format(port,user,server,pdf_filename)
 
-    logging.debug(cmd1)
+    logging.debug("process_pdf_proxy: {}".format(cmd1))
     subprocess.Popen(cmd1, shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    logging.debug(cmd2)
+    logging.debug("process_pdf_proxy: {}".format(cmd2))
     subprocess.Popen(cmd2, shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()    
     
     return
 
-def get_gateway(article_bibcode,
+def get_article_gateway(article_bibcode,
                 gateway_url="https://ui.adsabs.harvard.edu/link_gateway"):
     """
     fulltext_source='PUB' or 'EPRINT'
@@ -524,24 +535,12 @@ class Preferences(object):
         """
         
         prefs = ConfigParser(interpolation=ExtendedInterpolation())
-        prefs.read_string("""
-            
-            [default]
-            ads_mirror = ui.adsabs.hardvard.edu
-            ads_token = dev_key
-
-            [proxy]
-            ssh_user = None
-            ssh_server = None
-            ssh_port = 22
-            
-            [options]
-            download_pdf = True
-            pdf_reader = None
-            debug = False
-            
-            """)
+        
+        this_dir, this_filename = os.path.split(__file__)
+        prefs_default_path = os.path.join(this_dir, "ads2bibdesk.cfg.default")
+        prefs.read(prefs_default_path)
         prefs_dir=os.path.dirname(self.prefs_path)
+        
         if  not os.path.exists(prefs_dir):
                 os.makedirs(prefs_dir)
         if  not os.path.exists(self.prefs_path):

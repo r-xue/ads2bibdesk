@@ -1,14 +1,17 @@
+#######################################################################
 #
 #   This is the default preference file
-#   edit and copy to ~/.ads/
+#   for a customized preference, edit this file and copy it to:
+#       ~/.ads/ads2bibdesk.cfg
 #      
-#   ADS API key can be set by replacing "dev_key"
+#   The personal ADS API key can be set by replacing "dev_key" below
 #   or
-#   Add the key to ~/.ads/dev_key
+#   Add the key to a file named ~/.ads/dev_key in plain-text
 #   
+#######################################################################
 
 [default]
-ads_mirror = ui.adsabs.hardvard.edu
+ads_mirror = ui.adsabs.harvard.edu
 ads_token = dev_key
 
 [proxy]
@@ -18,5 +21,4 @@ ssh_port = 22
 
 [options]
 download_pdf = True
-pdf_reader = None
 debug = False

@@ -25,13 +25,13 @@ Installation
 The command line script can be installed via::
 
     python3 setup.py install --user     # from a local copy
-    pip3 install --user ads2bibdesk     # or, from the PyPI index
+    pip3 install --user ads2bibdesk     # or, from PyPI
     pip3 install --user -e .            # or, "Editable" install
 
 To have the MacOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
 
     python3 setup.py install --user --service                       # from a local copy
-    pip3 install --user --install-option="--service" ads2bibdesk    # from the PyPI index
+    pip3 install --user --install-option="--service" ads2bibdesk    # from PyPI
 
 Usage
 ~~~~~
@@ -42,11 +42,13 @@ Add or update a new article from ADS::
     ads2bibdesk "2019ApJ...873..122D"
     ads2bibdesk "1301.0371"
     ads2bibdesk "2019arXiv190404507R"
+    ads2bibdesk "10.3847/1538-4357/aafd37"
 
 **ads2bibdesk** accepts two kinds of article identifier at this moment
 
-- the ADS bibcode of an article (e.g. ``1998ApJ...500..525S``, ``2019arXiv190404507R``)
-- the arXiv id of an article (e.g. ``0911.4956``).
+- ADS bibcode (e.g. ``1998ApJ...500..525S``, ``2019arXiv190404507R``)
+- arXiv id (e.g. ``0911.4956``).
+- doi (e.g. ``10.3847/1538-4357/aafd37``)
 
 A full summary of **ads2bibdesk** commands is available via::
     
@@ -71,22 +73,24 @@ On my working machine, I have Python 3.7 from MacPorts as default::
     sudo port select python python37
     sudo port select ipython py37-ipython
     
-Plan, and a To-Do List
+Status and Plan
 ==============================
 
-The current approach is to start the development from a relatively clean-sheet codebase, with the following functions already implemented:
+The current approach is to start the development from a relatively clean-sheet codebase. The following functions have *already* been implemented:
 
-- query the article metadata (title, abstract, BibTeX, etc.) with the new API by article identifiers (no more in-house ADS/arxiv HTML parser functions)
-- add/update BibTeX entry using the article identifier
-- download article PDFs using the new ADS gateway links and attached them to the BibDesk database
-- update the BibDesk database and attached PDFs (by borrowing the BibDesk class from the original ads_bibdesk)
+- query the article metadata (title, abstract, BibTeX, etc.) with the new API by article identifiers (no more in-house ADS/arxiv HTML parsing functions)
+- download article PDFs using the new ADS gateway links
+- use an on-campus ``ssh`` proxy machine to download PDFs behind the journal paywall
+- add/update the BibDesk database and attach downloaded PDFs (largely borrowing the `AppleScript <https://en.wikipedia.org/wiki/AppleScript>`_ method from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_)
+
+Some other improvements from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are:
+
+- clean up the dependency requirements (let setup.py do the check)
 - replace obsolete Python syntax/functions/modules with newer ones, e.g. optparser->argparser, f-string formatting, and use configparser()
-- clear up the dependency requirements (let setup.py do the check)
-- use an on-campus ``ssh`` proxy machine to download PDFs behind the journal paywall.
-- The MacOS Automator workflow is running the shell script rather than a full-on Python program embedded (this is a necessary workaround since Python 3 is not shipped as default yet)
+- The MacOS Automator workflow is running the installed console script rather than an embedded Python program (this is a necessary workaround since Python 3 is not shipped as default yet)
 
-Note: many features from the original ads_bibdesk are gone at this moment: notably, the "ingest" and "preprint-update" modes.
-they can be added back in future.
+Many features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone at this moment, notably, the "ingest" and "preprint-update" modes.
+They can be added back in future.
 
 
 
