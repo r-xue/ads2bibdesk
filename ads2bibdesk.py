@@ -385,7 +385,10 @@ def notify(title, subtitle, desc, sticky=False):
         # revert to growl
         if subtitle:
             desc = subtitle + ': ' + desc
-        growl_notify(title, desc, sticky)
+        try:
+            growl_notify(title, desc, sticky)
+        except:
+            pass
 
 def has_annotationss(f):
     """
