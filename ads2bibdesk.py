@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Standard
+
 import os
 import sys
 
@@ -10,9 +12,11 @@ import logging
 import tempfile
 import subprocess
 
+# Dependent
+
 import ads
 import requests
-import AppKit       #   from pyobjc
+import AppKit       #   from PyObjc rather than the "AppKit"-named module
 
 __version__ = '0.1.dev5'
 

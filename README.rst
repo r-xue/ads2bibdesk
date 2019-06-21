@@ -5,11 +5,11 @@ ADS to BibDesk  :sup:`API edition`    (ads2bibdesk)
 
 The program is loosely based on the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ from J. Sick et al.
 *However*, the query is handled with a python client for the ADS API (`ads <http://ads.readthedocs.io>`_, maintained by A. Casey). 
-Obsolete codes were replaced in favor of newer built-in Python modules with a simplified code structure. 
-The MacOS workflow and app building process were updated.
+Obsolete codes are replaced in favor of newer built-in Python modules with a simplified code structure. 
+The MacOS workflow building process have been updated.
 The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_. 
 
-Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key (i.e., token), per the new NASA/ADS policy. 
+Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key, per the new NASA/ADS policy. 
 The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
 
@@ -44,7 +44,7 @@ Add or update a new article from ADS::
     ads2bibdesk "2019arXiv190404507R"
     ads2bibdesk "10.3847/1538-4357/aafd37"
 
-**ads2bibdesk** accepts two kinds of article identifier at this moment
+**ads2bibdesk** accepts three kinds of article identifier at this moment
 
 - ADS bibcode (e.g. ``1998ApJ...500..525S``, ``2019arXiv190404507R``)
 - arXiv id (e.g. ``0911.4956``).
@@ -62,35 +62,33 @@ I've only tested the program on the following MacOS setup:
 
 * MacOS (>=10.14)
 * Python (>=3.7.3)
-* BibDesk (>=1.6.22)
+* BibDesk (>=1.7.1)
 
-While the program might work on slightly older software versions, I have no clear plan to improve the backward compatibility.
-Considering that Python 2.7 will be deprecated soon and Python 3.7 may come with MacOS 10.15 by default, the decision may be appropriate,
-and will reduce the required maintenance/development efforts in longer-term.
-On my working machine, I have Python 3.7 from MacPorts as default::
+While the program likely works on slightly older software versions, I don't focus on the backward compatibility.
+Considering that Python 2.7 will be deprecated and `_Python 3.7 will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
+On my working machine (Mojave), I have Python 3.7 from MacPorts as default::
 
     sudo port select pip pip37        
     sudo port select python python37
     sudo port select ipython py37-ipython
     
-Status and Plan
+Status
 ==============================
 
-The current approach is to start the development from a relatively clean-sheet codebase. The following functions have *already* been implemented:
+The following functions have *already* been implemented in the package:
 
 - query the article metadata (title, abstract, BibTeX, etc.) with the new API by article identifiers (no more in-house ADS/arxiv HTML parsing functions)
-- download article PDFs using the new ADS gateway links
-- use an on-campus ``ssh`` proxy machine to download PDFs behind the journal paywall
+- download article PDFs using the ADS gateway links
+- use an authorized on-campus ``ssh`` proxy machine (with your public key) to download PDFs behind the journal paywall
 - add/update the BibDesk database and attach downloaded PDFs (largely borrowing the `AppleScript <https://en.wikipedia.org/wiki/AppleScript>`_ method from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_)
 
-Some other improvements from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are:
+Other changes from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ include:
 
 - clean up the dependency requirements (let setup.py do the check)
 - replace obsolete Python syntax/functions/modules with newer ones, e.g. optparser->argparser, f-string formatting, and use configparser()
-- The MacOS Automator workflow is running the installed console script rather than an embedded Python program (this is a necessary workaround since Python 3 is not shipped as default yet)
+- The MacOS Automator workflow is running the installed console script rather than an embedded Python program
 
-Many features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone at this moment, notably, the "ingest" and "preprint-update" modes.
-They can be added back in future.
+Some less-used features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone: notably, the "ingest" and "preprint-update" modes.
 
 
 

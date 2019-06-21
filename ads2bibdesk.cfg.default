@@ -7,7 +7,10 @@
 #   The personal ADS API key can be set by replacing "dev_key" below
 #   or
 #   Add the key to a file named ~/.ads/dev_key in plain-text
-#   
+#
+#   Set up a SSH key pair on your local and remote machines for a 
+#   seamless login
+#    
 #######################################################################
 
 [default]
