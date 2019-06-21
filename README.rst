@@ -65,7 +65,7 @@ I've only tested the program on the following MacOS setup:
 * BibDesk (>=1.7.1)
 
 While the program likely works on slightly older software versions, I don't focus on the backward compatibility.
-Considering that Python 2.7 will be deprecated and `_Python 3.7 will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
+Considering that Python 2.7 will be deprecated and `Python 3.7 will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
 On my working machine (Mojave), I have Python 3.7 from MacPorts as default::
 
     sudo port select pip pip37        
@@ -89,6 +89,7 @@ Other changes from the original `ads_bibdesk <https://github.com/jonathansick/ad
 - The MacOS Automator workflow is running the installed console script rather than an embedded Python program
 
 Some less-used features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone: notably, the "ingest" and "preprint-update" modes.
+But I plan to at least add back the "preprint-update" option (by scanning ``article_bibcode``s associated with arXiv).
 
 
 

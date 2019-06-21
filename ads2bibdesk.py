@@ -387,13 +387,15 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
     """   
     try:
         if  alert_sound is None:
-            os.system("""
+            subprocess.Popen("""
                       osascript -e 'display notification "{}" with title "{}" subtitle "{}"'
-                      """.format(desc,title,subtitle))
+                      """.format(desc,title,subtitle),
+                      shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         else:
-            os.system("""
+            subprocess.Popen("""
                       osascript -e 'display notification "{}" with title "{}" subtitle "{}" sound name "{}"'
-                      """.format(desc,title,subtitle,alert_sound))        
+                      """.format(desc,title,subtitle,alert_sound),
+                      shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
  
     except ExplicitException:
         
