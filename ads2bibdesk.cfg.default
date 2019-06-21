@@ -21,4 +21,5 @@ ssh_port = 22
 
 [options]
 download_pdf = True
+alert_sound = True
 debug = False

@@ -119,6 +119,11 @@ def process_token(article_identifier, prefs, bibdesk):
     print(article_identifier)
     """
     
+    if  'true' in prefs['options']['alert_sound'].lower():
+        alert_sound='Frog'
+    else:
+        alert_sound=None
+    
     if  'dev_key' not in prefs['default']['ads_token']:
         ads.config.token = prefs['default']['ads_token']
     
@@ -131,7 +136,7 @@ def process_token(article_identifier, prefs, bibdesk):
     except:
         logging.info("API response error, Likely no authorized key is provided!")
         notify('API response error', 'key:'+prefs['default']['ads_token'], 
-               'Likely no authorized key is provided!')
+               'Likely no authorized key is provided!',alert_sound=alert_sound)
         return False
     
     if  len(ads_articles)!=1:
@@ -139,7 +144,7 @@ def process_token(article_identifier, prefs, bibdesk):
             ' Zero or Multiple ADS entries for the article identifiier: {}'.format(article_identifier))
         logging.debug('Matching Number: {}'.format(len(ads_articles)))
         notify('Found Zero or Multiple ADS antries for ',
-                article_bibcode, ' No update in BibDesk')
+                article_bibcode, ' No update in BibDesk', alert_sound=alert_sound)
         logging.info("Found Zero or Multiple ADS antries for {}".format(article_identifier))
         logging.info("No update in BibDesk")
 
@@ -201,7 +206,7 @@ def process_token(article_identifier, prefs, bibdesk):
                     'return its note', pid).stringValue()
                 kept_pdfs += bibdesk.safe_delete(pid)
                 notify('Duplicate publication removed',
-                       article_identifier, ads_article.title[0])
+                       article_identifier, ads_article.title[0], alert_sound=alert_sound)
                 logging.info('Duplicate publication removed:')
                 logging.info(article_identifier)
                 logging.info(ads_article.title[0])              
@@ -258,7 +263,7 @@ def process_token(article_identifier, prefs, bibdesk):
             bibdesk(f'set value of field "{(k, v)}" to "{pub}"')
     notify('New publication added',
            bibdesk('cite key', pub).stringValue(),
-           ads_article.title[0])
+           ads_article.title[0], alert_sound=alert_sound)
     logging.info('New publication added:')
     logging.info(bibdesk('cite key', pub).stringValue())
     logging.info(ads_article.title[0])
@@ -366,7 +371,7 @@ def get_filetype(filename):
 
 
     
-def notify(title, subtitle, desc, sticky=False, alert_sound='Frog'):
+def notify(title, subtitle, desc, alert_sound='Frog'):
     """
     Publish a notification to Notification Center:
         try the applescript method first, then the "objc" method
@@ -577,6 +582,7 @@ class Preferences(object):
             
             [options]
             download_pdf = True
+            alert_sound = True
             debug = False            
                           
             """)
