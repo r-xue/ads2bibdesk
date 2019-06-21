@@ -89,7 +89,7 @@ Other changes from the original `ads_bibdesk <https://github.com/jonathansick/ad
 - The MacOS Automator workflow is running the installed console script rather than an embedded Python program
 
 Some less-used features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone: notably, the "ingest" and "preprint-update" modes.
-But I plan to at least add back the "preprint-update" option (by scanning ``article_bibcode`` associated with arXiv).
+But I plan to at least add back the "preprint-update" option, by scanning/updating ``article_bibcode`` associated with arXiv). My improvement proposal can be found `here <https://github.com/r-xue/ads2bibdesk/labels/enhancement>`_.
 
 
 
