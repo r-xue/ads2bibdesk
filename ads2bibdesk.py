@@ -14,7 +14,7 @@ import ads
 import requests
 import AppKit       #   from pyobjc
 
-__version__ = '0.1.dev4'
+__version__ = '0.1.dev5'
 
 def main():
     """
@@ -365,30 +365,43 @@ def get_filetype(filename):
         return x
 
 
-def notify(title, subtitle, desc, sticky=False):
-    """Publish a notification to Notification Center
-
-    Adaptation of original by Moises Aranas
-    https://github.com/maranas/pyNotificationCenter
+    
+def notify(title, subtitle, desc, sticky=False, alert_sound='Frog'):
     """
+    Publish a notification to Notification Center:
+        try the applescript method first, then the "objc" method
+     
+    note: 
+        the applescript method only work with Mavericks (10.9) and later
+        alert_sound: 'Frog','Blow', 'Pop' etc. or None
+ 
+    """   
     try:
-        import objc
-        notification = objc.lookUpClass('NSUserNotification').alloc().init()
-        notification.setTitle_(title)
-        notification.setInformativeText_(desc)
-        notification.setSubtitle_(subtitle)
-        objc.lookUpClass('NSUserNotificationCenter').\
-            defaultUserNotificationCenter().scheduleNotification_(notification)
-        notification.dealloc()
-    # this will be either ImportError or objc.nosuchclass_error
-    except Exception:
-        # revert to growl
-        if subtitle:
-            desc = subtitle + ': ' + desc
+        if  alert_sound is None:
+            os.system("""
+                      osascript -e 'display notification "{}" with title "{}" subtitle "{}"'
+                      """.format(desc,title,subtitle))
+        else:
+            os.system("""
+                      osascript -e 'display notification "{}" with title "{}" subtitle "{}" sound name "{}"'
+                      """.format(desc,title,subtitle,alert_sound))        
+ 
+    except ExplicitException:
+        
         try:
-            growl_notify(title, desc, sticky)
-        except:
+            import objc
+            notification = objc.lookUpClass('NSUserNotification').alloc().init()
+            notification.setTitle_(title)
+            notification.setInformativeText_(desc)
+            notification.setSubtitle_(subtitle)
+            if  alert_sound is not None:
+                notification.setSoundName_(alert_sound) # "NSUserNotificationDefaultSoundName"
+            objc.lookUpClass('NSUserNotificationCenter').\
+                defaultUserNotificationCenter().scheduleNotification_(notification)
+            notification.dealloc()  
+        except ExplicitException:
             pass
+
 
 def has_annotationss(f):
     """
