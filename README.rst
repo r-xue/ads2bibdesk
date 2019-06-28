@@ -10,7 +10,7 @@ The MacOS workflow building process have been updated.
 The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_. 
 
 Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key, per the new NASA/ADS policy. 
-The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
+The instruction on how to obtain a key can be found on this official github repo: `adsabs-dev-api <https://github.com/adsabs/adsabs-dev-api>`_. The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
 
 
@@ -65,7 +65,7 @@ I've only tested the program on the following MacOS setup:
 * BibDesk (>=1.7.1)
 
 While the program likely works on slightly older software versions, I don't focus on the backward compatibility.
-Considering that Python 2.7 will be deprecated and `Python 3.7 will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
+Considering that Python 2.7 will be deprecated at the end of 2019 and `Python will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
 On my working machine (Mojave), I have Python 3.7 from MacPorts as default::
 
     sudo port select pip pip37        
