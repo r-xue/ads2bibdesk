@@ -4,12 +4,12 @@ ADS to BibDesk  :sup:`API edition`    (ads2bibdesk)
 **ads2bibdesk** helps you add astrophysics articles listed on NASA/ADS to your `BibDesk <https://bibdesk.sourceforge.io>`_ database using the *new* `ADS Developer API <http://adsabs.github.io/help/api/>`_.
 
 The program is loosely based on the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ from J. Sick et al.
-*However*, the query is handled with a python client for the ADS API (`ads <http://ads.readthedocs.io>`_, maintained by A. Casey). 
-Obsolete codes are replaced in favor of newer built-in Python modules with a simplified code structure. 
+*However*, the query is handled with a python client for the ADS API (`ads <http://ads.readthedocs.io>`_, maintained by A. Casey).
+Obsolete codes are replaced in favor of newer built-in Python modules with a simplified code structure.
 The MacOS workflow building process have been updated.
-The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_. 
+The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_.
 
-Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key, per the new NASA/ADS policy. 
+Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key, per the new NASA/ADS policy.
 The instruction on how to obtain a key can be found on this official github repo: `adsabs-dev-api <https://github.com/adsabs/adsabs-dev-api>`_. The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
 
@@ -51,7 +51,7 @@ Add or update a new article from ADS::
 - doi (e.g. ``10.3847/1538-4357/aafd37``)
 
 A full summary of **ads2bibdesk** commands is available via::
-    
+
     ads2bibdesk --help
 
 
@@ -68,10 +68,11 @@ While the program likely works on slightly older software versions, I don't focu
 Considering that Python 2.7 will be deprecated at the end of 2019 and `Python will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
 On my working machine (Mojave), I have Python 3.7 from MacPorts as default::
 
-    sudo port select pip pip37        
+    sudo port install python37 py37-pip py37-ipython
     sudo port select python python37
     sudo port select ipython py37-ipython
-    
+    sudo port select pip pip37
+
 Status
 ==============================
 
@@ -90,7 +91,3 @@ Other changes from the original `ads_bibdesk <https://github.com/jonathansick/ad
 
 Some less-used features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone: notably, the "ingest" and "preprint-update" modes.
 But I plan to at least add back the "preprint-update" option, by scanning/updating ``article_bibcode`` associated with arXiv). My improvement proposal can be found `here <https://github.com/r-xue/ads2bibdesk/labels/enhancement>`_.
-
-
-
-   

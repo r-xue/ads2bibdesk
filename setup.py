@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-Installation for command-line ADS to BibDesk
 
-Run::
+The command line script can be installed via one of these commands:
 
-    python setup.py install
+    python3 setup.py install --user     # from a local copy
+    pip3 install --user ads2bibdesk     # or, from PyPI
+    pip3 install --user -e .            # or, "Editable" install
 
-and the binary adsbibdesk will be installed into your path.
+To have the MacOS service installed at the same time, run one of the following options instead:
 
-To build the Add to BibDesk service, run::
+    python3 setup.py install --user --service                       # from a local copy
+    pip3 install --user --install-option="--service" ads2bibdesk    # from PyPI (broken at this moment)
 
-    python setup.py service
 """
 
 import os
@@ -23,7 +24,6 @@ import sys
 from setuptools import setup, Command
 from setuptools.command.install import install
 
-
 if  sys.version_info < (3, 6):
     raise Exception("ads2bibdesk requires Python 3.6 or higher.")
 
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 def read(fname):
     with open(rel_path(fname), 'r') as fh:
         return fh.read()
-    
+
 
 def get_version():
     version_file = read('ads2bibdesk.py')
@@ -41,16 +41,16 @@ def get_version():
                               version_file, re.M)
     if  version_match:
         return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")  
+    raise RuntimeError("Unable to find version string.")
 
 def rel_path(path):
     return os.path.join(os.path.dirname(__file__), path)
 
 class InstallCommand(install):
-    
+
     description = 'install everything from build directory'
     service_description = 'Build the "Add to BibDesk" service'
-    
+
     user_options = install.user_options + [
         ('service', None, service_description),
     ]
@@ -64,18 +64,18 @@ class InstallCommand(install):
         install.finalize_options(self)
 
     def run(self):
-                    
+
         install.run(self)
-        
+
         service = self.service # will be 1 or None
         if  service is not None:
-        
+
             cl_path=self.install_scripts
             cl_path=cl_path+'/ads2bibdesk'
-            
+
             service_path = rel_path(os.path.join(
                             "service","Add to BibDesk.workflow",
-                            "Contents", "document.wflow"))            
+                            "Contents", "document.wflow"))
             for workflow in [service_path]:
                 #print(workflow)
                 with open(workflow, 'rb') as fp:
@@ -83,16 +83,16 @@ class InstallCommand(install):
                     pl['actions'][0]['action']['ActionParameters']['COMMAND_STRING']=cl_path+' "$1"'
                 with open(workflow, 'wb') as fp:
                     plistlib.dump(pl, fp)
-    
+
                 logger.info('Saving "{}"'.format(workflow))
-            logger.info("Completed ADS to BibDesk build step")            
-            
+            logger.info("Completed ADS to BibDesk build step")
+
             workflow_ads2bibdesk=rel_path(os.path.join("service","Add to BibDesk.workflow"))
             workflow_ads2bibdesk=workflow_ads2bibdesk.replace(' ','\ ')
             workflow_system='~/Library/Services/'
             logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
-            os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)        
-        
+            os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)
+
 
 setup(
     name='ads2bibdesk',
@@ -112,7 +112,7 @@ setup(
                  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
                  "Operating System :: MacOS :: MacOS X",
                  "Topic :: Scientific/Engineering :: Astronomy"],
-    
+
     py_modules=['ads2bibdesk'],
     include_package_data=True,
     entry_points={'console_scripts': ['ads2bibdesk = ads2bibdesk:main']},
@@ -122,4 +122,3 @@ setup(
                   'Source': 'https://github.com/r-xue/ads2bibdesk/'},
     cmdclass={'install': InstallCommand}
 )
-

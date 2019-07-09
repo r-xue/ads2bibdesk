@@ -293,8 +293,10 @@ def process_pdf(article_bibcode,
     article_gateway=get_article_gateway(article_bibcode,gateway_url=gateway_url)
 
     pdf_status=False
+    
     for fulltext_source in fulltext_sources:
-        
+        if  'arxiv' in article_bibcode.lower() and 'pub' in fulltext_source.lower():
+            continue
         pdf_url = article_gateway[fulltext_source+'_pdf']
         logging.debug("process_pdf_local: {}".format(pdf_url))
         
