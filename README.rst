@@ -10,7 +10,13 @@ The MacOS workflow building process have been updated.
 The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_.
 
 Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key, per the new NASA/ADS policy.
-The instruction on how to obtain a key can be found on this official github repo: `adsabs-dev-api <https://github.com/adsabs/adsabs-dev-api>`_. The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
+The instruction on how to obtain a key can be found on this official github repo: `adsabs-dev-api <https://github.com/adsabs/adsabs-dev-api>`_.
+In short, to obtain access to the ADS Developer API, one must do two things:
+
+- `Create an account <https://ui.adsabs.harvard.edu/user/account/register>`_ and log in to the latest version of the ADS
+- Push the “Generate a new key” button under `Customize Settings -> Account Settings -> API Token<https://ui.adsabs.harvard.edu/user/settings/token>`_
+
+The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
 
 
@@ -24,25 +30,28 @@ Installation
 ~~~~~~~~~~~~
 The command line script can be installed via::
 
-    python3 setup.py install --user     # from a local copy
-    pip3 install --user ads2bibdesk     # or, from PyPI
-    pip3 install --user -e .            # or, "Editable" install
+    python setup.py install --user     # from a local copy
+    pip install --user ads2bibdesk     # or, from PyPI
+    pip install --user -e .            # or, "Editable" install
 
 To have the MacOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
 
-    python3 setup.py install --user --service                       # from a local copy
-    pip3 install --user --install-option="--service" ads2bibdesk    # from PyPI
+    python setup.py install --user --service                       # from a local copy
+    pip install --user --install-option="--service" ads2bibdesk    # from PyPI
+The option "--service" will copy the optional MacOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
+
+Note: Only Python >=3.7 is supported (see below_). If installing using the option "--user", you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
+
 
 Usage
 ~~~~~
 
 Add or update a new article from ADS::
 
+    ads2bibdesk "1807.04291"
+    ads2bibdesk "2018ApJ...864L..11X"
     ads2bibdesk "2013ARA&A..51..105C"
-    ads2bibdesk "2019ApJ...873..122D"
-    ads2bibdesk "1301.0371"
-    ads2bibdesk "2019arXiv190404507R"
-    ads2bibdesk "10.3847/1538-4357/aafd37"
+    ads2bibdesk "10.3847/2041-8213/aaf872"
 
 **ads2bibdesk** accepts three kinds of article identifier at this moment
 
@@ -57,6 +66,7 @@ A full summary of **ads2bibdesk** commands is available via::
 
 Compatibility and Dependency
 ============================
+.. _below:
 
 I've only tested the program on the following MacOS setup:
 
