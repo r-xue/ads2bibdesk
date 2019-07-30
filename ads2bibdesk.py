@@ -18,7 +18,7 @@ import ads
 import requests
 import AppKit       #   from PyObjc rather than the "AppKit"-named module
 
-__version__ = '0.1.dev5'
+__version__ = '0.1.dev6'
 
 def main():
     """
