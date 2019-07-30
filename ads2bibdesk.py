@@ -155,7 +155,17 @@ def process_token(article_identifier, prefs, bibdesk):
         return False
     
     ads_article = ads_articles[0]
-    ads_bibtex = ads.ExportQuery(bibcodes=ads_article.bibcode,format='bibtex').execute()
+    
+    use_bibtexabs=False
+    #   use "bibtex" by default
+    #   another option could be "bibtexabs":
+    #       https://github.com/andycasey/ads/pull/109
+    #   however, a change in ads() is required and the abstract field from the "bibtexabs" option doesn't
+    #   always comply with the tex syntax.     
+    if  use_bibtexabs==True:
+        ads_bibtex = ads.ExportQuery(bibcodes=ads_article.bibcode,format='bibtexabs').execute()
+    else:
+        ads_bibtex = ads.ExportQuery(bibcodes=ads_article.bibcode,format='bibtex').execute()
 
     logging.debug("process_token: >>>API limits")
     logging.debug("process_token:    {}".format(ads_query.response.get_ratelimits()))
@@ -445,7 +455,7 @@ class BibDesk(object):
             # address all publications
             cmd = 'tell first document of application "BibDesk" to {}'.format(cmd)
         else:
-            # address a single publicatin
+            # address a single publication
             cmd = 'tell first document of application "BibDesk" to '\
                   'tell first publication whose id is "{}" to {}'.format(pid, cmd)
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
