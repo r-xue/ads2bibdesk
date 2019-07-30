@@ -14,7 +14,7 @@ The instruction on how to obtain a key can be found on this official github repo
 In short, to obtain access to the ADS Developer API, one must do two things:
 
 - `Create an account <https://ui.adsabs.harvard.edu/user/account/register>`_ and log in to the latest version of the ADS
-- Push the “Generate a new key” button under `Customize Settings -> Account Settings -> API Token<https://ui.adsabs.harvard.edu/user/settings/token>`_
+- Push the “Generate a new key” button under `Customize Settings -> Account Settings -> API Token <https://ui.adsabs.harvard.edu/user/settings/token>`_
 
 The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
