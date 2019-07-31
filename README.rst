@@ -16,7 +16,7 @@ In short, to obtain access to the ADS Developer API, one must do two things:
 - `Create an account <https://ui.adsabs.harvard.edu/user/account/register>`_ and log in to the latest version of the ADS
 - Push the “Generate a new key” button under `Customize Settings -> Account Settings -> API Token <https://ui.adsabs.harvard.edu/user/settings/token>`_
 
-The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the template `here <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
+The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the `template <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
 
 
@@ -38,6 +38,7 @@ To have the MacOS `service <https://support.apple.com/guide/mac-help/use-service
 
     python setup.py install --user --service                       # from a local copy
     pip install --user --install-option="--service" ads2bibdesk    # from PyPI
+
 The option "--service" will copy the optional MacOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
 
 Note: Only Python >=3.7 is supported (see below_). If installing using the option "--user", you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
