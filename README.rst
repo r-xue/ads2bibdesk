@@ -30,13 +30,13 @@ Installation
 ~~~~~~~~~~~~
 The command line script can be installed via::
 
-    python setup.py install --user     # from a local copy
-    pip install --user ads2bibdesk     # or, from PyPI
-    pip install --user -e .            # or, "Editable" install
-
+    pip install --user .               $ from a local copy 
+    pip install --user -e .            # from a local copy, "Editable" install
+    pip install --user ads2bibdesk     # from PyPI  
+    
 To have the MacOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
 
-    python setup.py install --user --service                       # from a local copy
+    pip install --user --install-option="--service" .              # from a local copy
     pip install --user --install-option="--service" ads2bibdesk    # from PyPI
 
 The option "--service" will copy the optional MacOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
@@ -96,7 +96,7 @@ The following functions have *already* been implemented in the package:
 
 Other changes from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ include:
 
-- clean up the dependency requirements (let setup.py do the check)
+- clean up the dependency requirements 
 - replace obsolete Python syntax/functions/modules with newer ones, e.g. optparser->argparser, f-string formatting, and use configparser()
 - The MacOS Automator workflow is running the installed console script rather than an embedded Python program
 

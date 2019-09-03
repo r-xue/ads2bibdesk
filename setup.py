@@ -4,14 +4,21 @@
 
 The command line script can be installed via one of these commands:
 
-    python3 setup.py install --user     # from a local copy
-    pip3 install --user ads2bibdesk     # or, from PyPI
-    pip3 install --user -e .            # or, "Editable" install
+    pip install --user .               $ from a local copy 
+    pip install --user -e .            # or, from a local copy, "Editable" install
+    pip install --user ads2bibdesk     # or, from PyPI
+    python setup.py install --user     # or, alternatively, from a local copy    
 
 To have the MacOS service installed at the same time, run one of the following options instead:
 
-    python3 setup.py install --user --service                       # from a local copy
-    pip3 install --user --install-option="--service" ads2bibdesk    # from PyPI (broken at this moment)
+    pip install --user --install-option="--service" ads2bibdesk    # from PyPI (broken at this moment)
+    python setup.py install --user --service                       # from a local copy
+    
+Uninstall:
+
+    pip uninstall ads2bibdesk
+    python setup.py install --user --record tmp.txt & xargs rm -rf < tmp.txt
+    rm -rf ~/Library/Services/Add\ to\ BibDesk.workflow
 
 """
 

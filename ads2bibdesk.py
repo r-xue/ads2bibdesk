@@ -108,7 +108,7 @@ def process_token(article_identifier, prefs, bibdesk):
 
     Parameters
     ----------
-    article_bibcode : str
+    article_identifier : str
         Any user-supplied `str` token.
     prefs : :class:`Preferences`
         A `Preferences` instance.
@@ -148,7 +148,7 @@ def process_token(article_identifier, prefs, bibdesk):
             ' Zero or Multiple ADS entries for the article identifiier: {}'.format(article_identifier))
         logging.debug('Matching Number: {}'.format(len(ads_articles)))
         notify('Found Zero or Multiple ADS antries for ',
-                article_bibcode, ' No update in BibDesk', alert_sound=alert_sound)
+                article_identifier, ' No update in BibDesk', alert_sound=alert_sound)
         logging.info("Found Zero or Multiple ADS antries for {}".format(article_identifier))
         logging.info("No update in BibDesk")
 
@@ -459,6 +459,8 @@ class BibDesk(object):
             cmd = 'tell first document of application "BibDesk" to '\
                   'tell first publication whose id is "{}" to {}'.format(pid, cmd)
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
+        #logging.debug(cmd)
+        #logging.debug(output)
         if not error:
             output = output[0]
             if strlist:
