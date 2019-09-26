@@ -237,8 +237,9 @@ def process_token(article_identifier, prefs, bibdesk):
     bibdesk('set cite key to generated cite key', pub)
 
     # abstract
-    ads_abstract_clean=ads_article.abstract.replace('\\', r'\\').replace('"', r'\"').replace('}', ' ').replace('{', ' ')
-    bibdesk(f'set abstract to "{ads_abstract_clean}"', pub)
+    if ads_article.abstract is not None:
+        ads_abstract_clean=ads_article.abstract.replace('\\', r'\\').replace('"', r'\"').replace('}', ' ').replace('{', ' ')
+        bibdesk(f'set abstract to "{ads_abstract_clean}"', pub)
 
     doi = bibdesk('value of field "doi"', pub).stringValue()
     
