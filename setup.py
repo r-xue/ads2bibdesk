@@ -19,7 +19,11 @@ Uninstall:
     pip uninstall ads2bibdesk
     python setup.py install --user --record tmp.txt & xargs rm -rf < tmp.txt
     rm -rf ~/Library/Services/Add\ to\ BibDesk.workflow
-
+    
+    rm -rf ~/Library/Python/3.7/lib/python/site-packages/ads2bibdesk.py     # if installed from version<=0.1.dev7
+    rm -rf ~/Library/Python/3.7/lib/python/site-packages/ads2bibdesk-*dist* # if pip uninstall doesn't work
+    rm -rf ~/Library/Python/3.7/bin/ads2bibdesk
+    
 """
 
 import os

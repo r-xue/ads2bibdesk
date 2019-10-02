@@ -1,3 +1,6 @@
+import subprocess
+import os
+
 import AppKit       #   from PyObjc rather than the "AppKit"-named module
 
 import logging

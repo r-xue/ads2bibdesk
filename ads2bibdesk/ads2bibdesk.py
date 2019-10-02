@@ -75,23 +75,59 @@ the ads python package's instruction)
     if  args.debug==True:
         prefs['options']['debug']='True'
     
+    """
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s %(name)s %(levelname)s %(message)s',
         filename=log_path)  
     if  'true' not in prefs['options']['debug'].lower(): 
         logging.getLogger('').setLevel(logger.info)
+    """
+    
+    fh = logging.FileHandler(log_path)
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(CustomFormatter())
     
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
+    ch.setFormatter(CustomFormatter())
+    
+    logging.getLogger('').addHandler(fh)
     logging.getLogger('').addHandler(ch)
-
+    
+    
+    if  'true' not in prefs['options']['debug'].lower(): 
+        logging.getLogger('').setLevel(logging.INFO)
+    else:
+        logging.getLogger('').setLevel(logging.DEBUG)   
+    
     logger.info("Starting ADS to BibDesk")
     logger.debug("ADS to BibDesk version {}".format(__version__))
     logger.debug("Python: {}".format(sys.version))        
     
     article_status=process_article(args ,prefs)
 
+
+class CustomFormatter(logging.Formatter):
+    """
+    customized logging formatter which can handle mutiple-line msgs
+    """
+    def format(self, record:logging.LogRecord):
+        save_msg = record.msg
+        output = []
+        datefmt='%Y-%m-%d %H:%M:%S'
+        s = "{} : {:<32} : {:<8} : ".format(self.formatTime(record, datefmt),
+                                               record.name+'.'+record.funcName,
+                                               "[" + record.levelname + "]")
+        for line in save_msg.splitlines():
+            record.msg = line
+            output.append(s+line)
+            
+        output='\n'.join(output)
+        record.msg = save_msg
+        record.message = output
+
+        return output         
 
 def process_article(args, prefs):
     """
@@ -170,14 +206,14 @@ def process_token(article_identifier, prefs, bibdesk):
     else:
         ads_bibtex = ads.ExportQuery(bibcodes=ads_article.bibcode,format='bibtex').execute()
 
-    logger.debug("process_token: >>>API limits")
-    logger.debug("process_token:    {}".format(ads_query.response.get_ratelimits()))
-    logger.debug("process_token: >>>ads_bibtex")
-    logger.debug("process_token:    {}".format(ads_bibtex))
+    logger.debug(">>>API limits")
+    logger.debug("   {}".format(ads_query.response.get_ratelimits()))
+    logger.debug(">>>ads_bibtex")
+    logger.debug("   {}".format(ads_bibtex))
 
     for k, v in ads_article.items():
-        logger.debug('process_token: >>>{}'.format(k))
-        logger.debug('process_token:    {}'.format(v))
+        logger.debug('>>>{}'.format(k))
+        logger.debug('   {}'.format(v))
     
     article_bibcode=ads_article.bibcode
     gateway_url='https://'+prefs['default']['ads_mirror']+'/link_gateway'
