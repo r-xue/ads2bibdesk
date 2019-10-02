@@ -141,3 +141,12 @@ class BibDesk(object):
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
         new_groups=self.get_groups(pid)
         return new_groups
+    
+
+def has_annotationss(f):
+    """
+    """
+    return subprocess.Popen(
+        "strings {} | grep  -E 'Contents[ ]{{0,1}}\('".format(f),
+        shell=True, stdout=subprocess.PIPE,
+        stderr=open('/dev/null', 'w')).stdout.read() != b''     # b''!=u'' in Python 3    

@@ -6,7 +6,7 @@ import os
 import sys
 
 import argparse
-from configparser import ConfigParser, ExtendedInterpolation
+
 import difflib
 import logging
 import tempfile
@@ -18,6 +18,7 @@ import ads
 import requests
 
 from .bibdesk import BibDesk
+from .prefs import Preferences
 from . import __version__
 
 import logging
@@ -75,14 +76,14 @@ the ads python package's instruction)
         prefs['options']['debug']='True'
     
     logging.basicConfig(
-        level=logging.debug,
+        level=logging.DEBUG,
         format='%(asctime)s %(name)s %(levelname)s %(message)s',
         filename=log_path)  
     if  'true' not in prefs['options']['debug'].lower(): 
         logging.getLogger('').setLevel(logger.info)
     
     ch = logging.StreamHandler()
-    ch.setLevel(logger.debug)
+    ch.setLevel(logging.DEBUG)
     logging.getLogger('').addHandler(ch)
 
     logger.info("Starting ADS to BibDesk")
@@ -427,61 +428,6 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
             notification.dealloc()  
         except ExplicitException:
             pass
-
-
-def has_annotationss(f):
-    """
-    """
-    return subprocess.Popen(
-        "strings {} | grep  -E 'Contents[ ]{{0,1}}\('".format(f),
-        shell=True, stdout=subprocess.PIPE,
-        stderr=open('/dev/null', 'w')).stdout.read() != b''     # b''!=u'' in Python 3
-
-
-class Preferences(object):
-    
-    def __init__(self):
-        """
-        """
-        
-        self.prefs_path = os.path.expanduser('~/.ads/ads2bibdesk.cfg')
-        self.log_path = os.path.expanduser('~/.ads/ads2bibdesk.log')
-        self.prefs = self._get_prefs()
-
-    
-    def _get_prefs(self):
-        """
-        """
-        
-        prefs = ConfigParser(interpolation=ExtendedInterpolation())
-        prefs.read_string("""
-        
-            [default]
-            ads_mirror = ui.adsabs.harvard.edu
-            ads_token = dev_key
-            
-            [proxy]
-            ssh_user = None
-            ssh_server = None
-            ssh_port = 22
-            
-            [options]
-            download_pdf = True
-            alert_sound = True
-            debug = False            
-                          
-            """)
-        prefs_dir=os.path.dirname(self.prefs_path)
-        
-        if  not os.path.exists(prefs_dir):
-                os.makedirs(prefs_dir)
-        if  not os.path.exists(self.prefs_path):
-            with open(self.prefs_path, 'w') as prefs_file:
-                prefs.write(prefs_file)
-        else:
-            prefs.read(self.prefs_path)
-
-        return prefs 
 
 if  __name__ == '__main__':
     
