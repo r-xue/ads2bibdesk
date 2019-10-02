@@ -30,9 +30,10 @@ Installation
 ~~~~~~~~~~~~
 The command line script can be installed via::
 
-    pip install --user .               $ from a local copy 
-    pip install --user -e .            # from a local copy, "Editable" install
-    pip install --user ads2bibdesk     # from PyPI  
+    pip install --user .                                            # from a local copy 
+    pip install --user -e .                                         # from a local copy, "Editable" install
+    pip install --user git+https://github.com/r-xue/ads2bibdesk.git # from GitHub
+    pip install --user ads2bibdesk                                  # from PyPI (likely behind the GitHub version) 
     
 To have the MacOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
 
@@ -41,7 +42,7 @@ To have the MacOS `service <https://support.apple.com/guide/mac-help/use-service
 
 The option "--service" will copy the optional MacOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
 
-Note: Only Python >=3.7 is supported (see below_). If installing using the option "--user", you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
+Note: Only Python >=3.7 is supported (see below_). If install´ing using the option "--user", you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
 
 
 Usage

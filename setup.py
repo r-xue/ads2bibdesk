@@ -43,7 +43,7 @@ def read(fname):
 
 
 def get_version():
-    version_file = read('ads2bibdesk.py')
+    version_file = read('ads2bibdesk/__init__.py')
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
     if  version_match:
@@ -119,10 +119,9 @@ setup(
                  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
                  "Operating System :: MacOS :: MacOS X",
                  "Topic :: Scientific/Engineering :: Astronomy"],
-
-    py_modules=['ads2bibdesk'],
+    packages=["ads2bibdesk"],
     include_package_data=True,
-    entry_points={'console_scripts': ['ads2bibdesk = ads2bibdesk:main']},
+    entry_points={'console_scripts': ['ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
     python_requires='>=3.6, <4',
     install_requires=['ads','requests','pyobjc'],
     project_urls={'Bug Reports': 'https://github.com/r-xue/ads2bibdesk/issues',

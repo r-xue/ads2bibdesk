@@ -16,16 +16,18 @@ import subprocess
 
 import ads
 import requests
-import AppKit       #   from PyObjc rather than the "AppKit"-named module
 
-__version__ = '0.1.dev6'
+from .bibdesk import BibDesk
+from . import __version__
+
+import logging
+logger=logging.getLogger(__name__)
 
 def main():
     """
     Parse options and launch main loop
     """
-
-    
+        
     description = """
 
 ads2bibdesk helps you add astrophysics articles listed on NASA/ADS
@@ -73,19 +75,19 @@ the ads python package's instruction)
         prefs['options']['debug']='True'
     
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.debug,
         format='%(asctime)s %(name)s %(levelname)s %(message)s',
         filename=log_path)  
     if  'true' not in prefs['options']['debug'].lower(): 
-        logging.getLogger('').setLevel(logging.INFO)
+        logging.getLogger('').setLevel(logger.info)
     
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logger.debug)
     logging.getLogger('').addHandler(ch)
 
-    logging.info("Starting ADS to BibDesk")
-    logging.debug("ADS to BibDesk version {}".format(__version__))
-    logging.debug("Python: {}".format(sys.version))        
+    logger.info("Starting ADS to BibDesk")
+    logger.debug("ADS to BibDesk version {}".format(__version__))
+    logger.debug("Python: {}".format(sys.version))        
     
     article_status=process_article(args ,prefs)
 
@@ -138,19 +140,19 @@ def process_token(article_identifier, prefs, bibdesk):
     try:
         ads_articles = list(ads_query)
     except:
-        logging.info("API response error, Likely no authorized key is provided!")
+        logger.info("API response error, Likely no authorized key is provided!")
         notify('API response error', 'key:'+prefs['default']['ads_token'], 
                'Likely no authorized key is provided!',alert_sound=alert_sound)
         return False
     
     if  len(ads_articles)!=1:
-        logging.debug(
+        logger.debug(
             ' Zero or Multiple ADS entries for the article identifiier: {}'.format(article_identifier))
-        logging.debug('Matching Number: {}'.format(len(ads_articles)))
+        logger.debug('Matching Number: {}'.format(len(ads_articles)))
         notify('Found Zero or Multiple ADS antries for ',
                 article_identifier, ' No update in BibDesk', alert_sound=alert_sound)
-        logging.info("Found Zero or Multiple ADS antries for {}".format(article_identifier))
-        logging.info("No update in BibDesk")
+        logger.info("Found Zero or Multiple ADS antries for {}".format(article_identifier))
+        logger.info("No update in BibDesk")
 
         return False
     
@@ -167,14 +169,14 @@ def process_token(article_identifier, prefs, bibdesk):
     else:
         ads_bibtex = ads.ExportQuery(bibcodes=ads_article.bibcode,format='bibtex').execute()
 
-    logging.debug("process_token: >>>API limits")
-    logging.debug("process_token:    {}".format(ads_query.response.get_ratelimits()))
-    logging.debug("process_token: >>>ads_bibtex")
-    logging.debug("process_token:    {}".format(ads_bibtex))
+    logger.debug("process_token: >>>API limits")
+    logger.debug("process_token:    {}".format(ads_query.response.get_ratelimits()))
+    logger.debug("process_token: >>>ads_bibtex")
+    logger.debug("process_token:    {}".format(ads_bibtex))
 
     for k, v in ads_article.items():
-        logging.debug('process_token: >>>{}'.format(k))
-        logging.debug('process_token:    {}'.format(v))
+        logger.debug('process_token: >>>{}'.format(k))
+        logger.debug('process_token:    {}'.format(v))
     
     article_bibcode=ads_article.bibcode
     gateway_url='https://'+prefs['default']['ads_mirror']+'/link_gateway'
@@ -221,9 +223,9 @@ def process_token(article_identifier, prefs, bibdesk):
                 kept_pdfs += bibdesk.safe_delete(pid)
                 notify('Duplicate publication removed',
                        article_identifier, ads_article.title[0], alert_sound=alert_sound)
-                logging.info('Duplicate publication removed:')
-                logging.info(article_identifier)
-                logging.info(ads_article.title[0])              
+                logger.info('Duplicate publication removed:')
+                logger.info(article_identifier)
+                logger.info(ads_article.title[0])              
                 bibdesk.refresh()
 
     # add new entry
@@ -279,9 +281,9 @@ def process_token(article_identifier, prefs, bibdesk):
     notify('New publication added',
            bibdesk('cite key', pub).stringValue(),
            ads_article.title[0], alert_sound=alert_sound)
-    logging.info('New publication added:')
-    logging.info(bibdesk('cite key', pub).stringValue())
-    logging.info(ads_article.title[0])
+    logger.info('New publication added:')
+    logger.info(bibdesk('cite key', pub).stringValue())
+    logger.info(ads_article.title[0])
 
     # add back the static groups assignment
     if  kept_groups!=[]:
@@ -309,7 +311,7 @@ def process_pdf(article_bibcode,
         if  'arxiv' in article_bibcode.lower() and 'pub' in fulltext_source.lower():
             continue
         pdf_url = article_gateway[fulltext_source+'_pdf']
-        logging.debug("process_pdf_local: {}".format(pdf_url))
+        logger.debug("process_pdf_local: {}".format(pdf_url))
         
         response = requests.get(pdf_url,allow_redirects=True,
                             headers={'User-Agent':
@@ -326,7 +328,7 @@ def process_pdf(article_bibcode,
         
         if  'pub' in fulltext_source and \
             prefs['proxy']['ssh_user']!='None' and prefs['proxy']['ssh_server']!='None':
-            logging.debug("process_pdf_proxy: {}".format(pdf_url))
+            logger.debug("process_pdf_proxy: {}".format(pdf_url))
             process_pdf_proxy(pdf_url,pdf_filename,
                               prefs['proxy']['ssh_user'],
                               prefs['proxy']['ssh_server'],
@@ -346,10 +348,10 @@ def process_pdf_proxy(pdf_url,pdf_filename,user,server,port=22):
     cmd1 += '(KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36\\" \\"{}\\"\"'.format(pdf_url)
     cmd2 = 'scp -P {} -q {}@{}:/tmp/adsbibdesk.pdf {}'.format(port,user,server,pdf_filename)
 
-    logging.debug("process_pdf_proxy: {}".format(cmd1))
+    logger.debug("process_pdf_proxy: {}".format(cmd1))
     subprocess.Popen(cmd1, shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    logging.debug("process_pdf_proxy: {}".format(cmd2))
+    logger.debug("process_pdf_proxy: {}".format(cmd2))
     subprocess.Popen(cmd2, shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()    
     
@@ -435,144 +437,6 @@ def has_annotationss(f):
         shell=True, stdout=subprocess.PIPE,
         stderr=open('/dev/null', 'w')).stdout.read() != b''     # b''!=u'' in Python 3
 
-class BibDesk(object):
-    
-    def __init__(self):
-        """
-        Manage BibDesk publications using AppKit
-        """
-        self.app = AppKit.NSAppleScript.alloc()
-        self.refresh()
-
-    def __call__(self, cmd, pid=None, strlist=False, error=False):
-        """
-        Run AppleScript command on first document of BibDesk
-        :param cmd: AppleScript command string
-        :param pid: address call to first/last publication of document
-        :param strlist: return output as list of string
-        :param error: return full output of call, including error
-        """
-        if  pid is None:
-            # address all publications
-            cmd = 'tell first document of application "BibDesk" to {}'.format(cmd)
-        else:
-            # address a single publication
-            cmd = 'tell first document of application "BibDesk" to '\
-                  'tell first publication whose id is "{}" to {}'.format(pid, cmd)
-        output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        #logging.debug(cmd)
-        #logging.debug(output)
-        if not error:
-            output = output[0]
-            if strlist:
-                # objective C nuisances...
-                output = [output.descriptorAtIndex_(i + 1).stringValue()
-                          for i in range(output.numberOfItems())]
-        return output
-
-    def refresh(self):
-        # is there an opened document yet?
-        if self('return name of first document '
-                'of application "BibDesk"', error=True)[1] is not None:
-            # create blank one
-            self('tell application "BibDesk" to make new document')
-        self.titles = self('return title of publications', strlist=True)
-        self.ids = self('return id of publications', strlist=True)
-
-    def pid(self, title):
-        return self.ids[self.titles.index(title)]
-
-    def authors(self, pid):
-        """
-        Get name of authors of publication
-        """
-        return self('name of authors', pid, strlist=True)
-
-    def safe_delete(self, pid):
-        """
-        Safely delete publication + PDFs, taking into account
-        the existence of PDFs with Skim notes
-        """
-        keptPDFs = []
-        files = self('POSIX path of linked files', pid, strlist=True)
-        notes = self('text Skim notes of linked files', pid, strlist=True)
-
-        for f, n in zip([f for f in files if f is not None],
-                        [n for n in notes if n is not None]):
-            if f.lower().endswith('pdf'):
-                if '_notes_' in f:
-                    keptPDFs.append(f)
-                else:
-                    # check for annotations
-                    if n or has_annotationss(f):
-                        suffix = 1
-                        path, ext = os.path.splitext(f)
-                        backup = path + '_notes_{:d}.pdf'.format(suffix)
-                        while os.path.exists(backup):
-                            suffix += 1
-                            backup = path + '_notes_{:d}.pdf'.format(suffix)
-                        # rename
-                        os.rename(f, backup)
-                        keptPDFs.append(backup)
-                        if os.path.exists(path + '.skim'):
-                            os.rename(path + '.skim',
-                                      path + '_notes_{:d}.skim'.format(suffix))
-                    else:
-                        # remove file
-                        os.remove(f)
-        # delete publication
-        self('delete', pid)
-        return keptPDFs
-
-    def get_groups(self,pid):
-        """
-        Get names of the static groups
-        return a string list
-            output:      list        
-        """
-        cmd="""
-            tell first document of application "BibDesk"
-            set oldPub to ( get first publication whose id is "{}" ) 
-            set pGroups to ( get static groups whose publications contains oldPub ) 
-            set GroupNames to {{}}
-            repeat with aGroup in pGroups 
-                copy (name of aGroup) to the end of GroupNames
-            end repeat
-            return GroupNames 
-            end tell
-        """.format(pid)
-
-        output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        output=output[0]
-        output = [output.descriptorAtIndex_(i + 1).stringValue()
-                  for i in range(output.numberOfItems())]
-        logging.debug("check static groups: pid: {}; static group: {}".format(pid,output))
-        return output
-    
-    def add_groups(self,pid,groups):
-        """
-        add the publication into static groups
-        note:
-            AppleScript lists are bracked by curly braces with items separate by commas
-            Each item is an alphanumeric label(?) or a string enclosed by double quotes or a list itself
-                e.g. { "group1", "groups" }
-            pid:         string
-            groups:      list
-        """
-        as_groups=", ".join(['\"'+x+'\"' for x in groups])
-        cmd="""
-            tell first document of application "BibDesk"
-                set newPub to ( get first publication whose id is "{}" )
-                #set AppleScript's text item delimiters to return
-                repeat with agroup in {{ {} }}
-                    set theGroup to get static group agroup
-                    add newPub to theGroup
-                end repeat
-            end tell
-        """.format(pid,as_groups)
-        output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        new_groups=self.get_groups(pid)
-        return new_groups
 
 class Preferences(object):
     
