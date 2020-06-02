@@ -31,9 +31,7 @@ class BibDesk(object):
             cmd = 'tell first document of application "BibDesk" to '\
                   'tell first publication whose id is "{}" to {}'.format(pid, cmd)
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        #logger.debug(cmd)
-        #logger.debug(output)
-        if not error:
+        if  not error:
             output = output[0]
             if strlist:
                 # objective C nuisances...

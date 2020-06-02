@@ -6,7 +6,7 @@ ADS to BibDesk  :sup:`API edition`    (ads2bibdesk)
 The program is loosely based on the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ from J. Sick et al.
 *However*, the query is handled with a python client for the ADS API (`ads <http://ads.readthedocs.io>`_, maintained by A. Casey).
 Obsolete codes are replaced in favor of newer built-in Python modules with a simplified code structure.
-The MacOS workflow building process have been updated.
+The macOS workflow building process have been updated.
 The project packaging now follows the new PyPA `guideline <https://packaging.python.org/tutorials/packaging-projects>`_.
 
 Due to the API usage, **ads2bibdesk** requires the user to specify a personal API key, per the new NASA/ADS policy.
@@ -16,12 +16,14 @@ In short, to obtain access to the ADS Developer API, one must do two things:
 - `Create an account <https://ui.adsabs.harvard.edu/user/account/register>`_ and log in to the latest version of the ADS
 - Push the “Generate a new key” button under `Customize Settings -> Account Settings -> API Token <https://ui.adsabs.harvard.edu/user/settings/token>`_
 
-The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the `template <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk.cfg.default>`_).
+The API key can be written into your **ads2bibdesk** preference file ``~/.ads/ads2bibdesk.cfg`` (see the `template <https://github.com/r-xue/ads2bibdesk/blob/master/ads2bibdesk/ads2bibdesk.cfg.default>`_).
 Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, one can also save the key to ``~/.ads/dev_key`` or as an environment variable named ``ADS_DEV_KEY``.
-
 
 * Repo: https://github.com/r-xue/ads2bibdesk
 * PyPI: https://pypi.python.org/pypi/ads2bibdesk
+
+Credit to the contributors of the original `ads_bibdesk` 
+`@jonathansick <http://github.com/jonathansick>`_ `@RuiPereira <>`_ `@keflavich <>`_ for their initial implementation.
 
 Quickstart
 ============
@@ -30,19 +32,23 @@ Installation
 ~~~~~~~~~~~~
 The command line script can be installed via::
 
-    pip install --user .                                            # from a local copy 
-    pip install --user -e .                                         # from a local copy, "Editable" install
     pip install --user git+https://github.com/r-xue/ads2bibdesk.git # from GitHub
     pip install --user ads2bibdesk                                  # from PyPI (likely behind the GitHub version) 
-    
-To have the MacOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
+    pip install --user .                                            # from a local copy 
+    pip install --user -e .                                         # from a local copy, "Editable" install
 
-    pip install --user --install-option="--service" .              # from a local copy
-    pip install --user --install-option="--service" ads2bibdesk    # from PyPI
+To have the macOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
 
-The option "--service" will copy the optional MacOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
+    pip install --user --install-option="--service" .               # from a local copy
+    pip install --user --install-option="--service" ads2bibdesk     # from PyPI
 
-Note: Only Python >=3.7 is supported (see below_). If install´ing using the option "--user", you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
+The option "--service" will copy the optional macOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
+
+Note: 
+
+* Only Python >=3.7 is supported (see below_). 
+* With the "--user" option, you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
+* The macOS workflow is not working properly on macOS 10.14 Mojave and 10.15 Catalina (see this `issue <https://github.com/r-xue/ads2bibdesk/issues/8>`_)
 
 
 Usage
@@ -70,20 +76,20 @@ Compatibility and Dependency
 ============================
 .. _below:
 
-I've only tested the program on the following MacOS setup:
+I've only tested the program on the following macOS setup:
 
-* MacOS (>=10.14)
+* macOS (>=10.14)
 * Python (>=3.7.3)
 * BibDesk (>=1.7.1)
 
 While the program likely works on slightly older software versions, I don't focus on the backward compatibility.
-Considering that Python 2.7 will be deprecated at the end of 2019 and `Python will not even be shipped with MacOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
+Considering that Python 2.7 will be deprecated at the end of 2019 and `Python will not even be shipped with maccOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
 On my working machine (Mojave), I have Python 3.7 from MacPorts as default::
 
-    sudo port install python37 py37-pip py37-ipython
-    sudo port select python python37
-    sudo port select ipython py37-ipython
-    sudo port select pip pip37
+    sudo port install python38 py38-pip py38-ipython
+    sudo port select python python38
+    sudo port select ipython py38-ipython
+    sudo port select pip pip38
 
 Status
 ==============================
@@ -99,7 +105,7 @@ Other changes from the original `ads_bibdesk <https://github.com/jonathansick/ad
 
 - clean up the dependency requirements 
 - replace obsolete Python syntax/functions/modules with newer ones, e.g. optparser->argparser, f-string formatting, and use configparser()
-- The MacOS Automator workflow is running the installed console script rather than an embedded Python program
+- The macOS Automator workflow is running the installed console script rather than an embedded Python program
 
 Some less-used features from the original `ads_bibdesk <https://github.com/jonathansick/ads_bibdesk>`_ are gone: notably, the "ingest" and "preprint-update" modes.
 But I plan to at least add back the "preprint-update" option, by scanning/updating ``article_bibcode`` associated with arXiv). My improvement proposal can be found `here <https://github.com/r-xue/ads2bibdesk/labels/enhancement>`_.

@@ -92,14 +92,16 @@ the ads python package's instruction)
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(CustomFormatter())
     
-    logging.getLogger('').addHandler(fh)
-    logging.getLogger('').addHandler(ch)
+    rootlogger=logging.getLogger('')
+    rootlogger.addHandler(fh)
+    rootlogger.addHandler(ch)
     
     
     if  'true' not in prefs['options']['debug'].lower(): 
-        logging.getLogger('').setLevel(logging.INFO)
+        rootlogger.setLevel(logging.INFO)
+        ch.setFormatter('')
     else:
-        logging.getLogger('').setLevel(logging.DEBUG)   
+        rootlogger.setLevel(logging.DEBUG)   
     
     logger.info("Starting ADS to BibDesk")
     logger.debug("ADS to BibDesk version {}".format(__version__))
@@ -116,9 +118,9 @@ class CustomFormatter(logging.Formatter):
         save_msg = record.msg
         output = []
         datefmt='%Y-%m-%d %H:%M:%S'
-        s = "{} : {:<32} : {:<8} : ".format(self.formatTime(record, datefmt),
-                                               record.name+'.'+record.funcName,
-                                               "[" + record.levelname + "]")
+        s = "{} {:<32} {:<8} : ".format(self.formatTime(record, datefmt),
+                                          record.name+'.'+record.funcName,
+                                          "[" + record.levelname + "]")
         for line in save_msg.splitlines():
             record.msg = line
             output.append(s+line)
@@ -424,7 +426,6 @@ def get_filetype(filename):
         return x.decode()
     except:
         return x
-
 
     
 def notify(title, subtitle, desc, alert_sound='Frog'):
