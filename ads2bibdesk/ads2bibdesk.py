@@ -34,20 +34,15 @@ def main():
 ads2bibdesk helps you add astrophysics articles listed on NASA/ADS
 to your BibDesk database using the ADS Developer API
 
-ads2bibdesk accepts many kinds of article tokens:
- - the ADS bibcode of an article (e.g. 1998ApJ...500..525S, 2019arXiv190404507R), or
- - the arXiv identifier of an article (e.g. 0911.4956).
- - doi of an article (e.g. 10.3847/1538-4357/aafd37)
-(Example: `ads2bibdesk "2019arXiv190404507R"`)
-
 Different from J.Sick's original `ads_bibdesk` or `adsbibdesk`, ads2bibdesk require the user
 to specify a personal ADS API key (per the new ADS policy). The metadata query will be performed
 using the API python client maintained by Andy Casey: 
   http://ads.readthedocs.io
 
-The API key can be written into your ads2bibdesk preference file ~/.ads/ads2bibdesk.cfg, or
-saved to ~/.ads/dev_key or saved as an environment variable named ADS_DEV_KEY (following 
-the ads python package's instruction)
+The API key can be set with the following options:
+ - your ads2bibdesk preference file: ~/.ads/ads2bibdesk.cfg, 
+ - the API client key file: ~/.ads/dev_key
+ - an environment variable named ADS_DEV_KEY (following the ads python package's instruction)
 
 """
 
@@ -60,10 +55,10 @@ the ads python package's instruction)
                         help="Debug mode; prints extra statements")
     
     parser.add_argument('article_identifier',type=str,
-                        help="""A required article identifier, which could be:
-  - the ADS bibcode of an article, or
-  - the arXiv id of an article, or
-  - article doi """)
+                        help="""The identifier of an article could be:
+  - ADS bibcode (e.g. 1998ApJ...500..525S, 2019arXiv190404507R)
+  - arXiv identifier (e.g. 0911.4956).
+  - article doi (e.g. 10.3847/1538-4357/aafd37)""")
 
     args = parser.parse_args()
     
