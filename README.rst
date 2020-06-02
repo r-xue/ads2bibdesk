@@ -23,7 +23,7 @@ Following the Python/ads package's `instruction <http://ads.readthedocs.io>`_, o
 * PyPI: https://pypi.python.org/pypi/ads2bibdesk
 
 Credit to the contributors of the original `ads_bibdesk` 
-`@jonathansick <http://github.com/jonathansick>`_ `@RuiPereira <>`_ `@keflavich <>`_ for their initial implementation.
+`@jonathansick <http://github.com/jonathansick>`_ `@RuiPereira <https://github.com/RuiPereira>`_ `@keflavich <https://github.com/keflavich>`_ for their initial implementation.
 
 Quickstart
 ============
@@ -83,8 +83,7 @@ I've only tested the program on the following macOS setup:
 * BibDesk (>=1.7.1)
 
 While the program likely works on slightly older software versions, I don't focus on the backward compatibility.
-Considering that Python 2.7 will be deprecated at the end of 2019 and `Python will not even be shipped with maccOS 10.15 (Catalina) by Apple <https://developer.apple.com/documentation/macos_release_notes/macos_catalina_10_15_beta_2_release_notes>`_ (so the users can do whatever you want), the decision looks appropriate and will reduce the required maintenance/development efforts in longer-term.
-On my working machine (Mojave), I have Python 3.7 from MacPorts as default::
+On my working machine (Catalina), I set Python 3.8 from MacPorts as default::
 
     sudo port install python38 py38-pip py38-ipython
     sudo port select python python38
