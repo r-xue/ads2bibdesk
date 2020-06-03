@@ -20,7 +20,6 @@ class Preferences(object):
         prefs.read_string("""
         
             [default]
-            ads_mirror = ui.adsabs.harvard.edu
             ads_token = dev_key
             
             [proxy]

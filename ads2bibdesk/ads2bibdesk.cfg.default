@@ -14,7 +14,6 @@
 #######################################################################
 
 [default]
-ads_mirror = ui.adsabs.harvard.edu
 ads_token = dev_key
 
 [proxy]

@@ -179,7 +179,7 @@ def process_token(article_identifier, prefs, bibdesk):
     ads_query = ads.SearchQuery(identifier=article_identifier,
                               fl=['author','first_author',
                                   'bibcode','identifier','alternate_bibcode','id',
-                                  'year', 'title','abstract','links_data'])
+                                  'year', 'title','abstract','links_data','esources'])
     try:
         ads_articles = list(ads_query)
     except:
@@ -222,9 +222,8 @@ def process_token(article_identifier, prefs, bibdesk):
         logger.debug('   {}'.format(v))
     
     article_bibcode=ads_article.bibcode
-    gateway_url='https://'+prefs['default']['ads_mirror']+'/link_gateway'
-    #   https://ui.adsabs.harvard.edu/link_gateway by default
-    
+    gateway_url='https://ui.adsabs.harvard.edu/link_gateway'
+
     if  'true' in prefs['options']['download_pdf'].lower():
         pdf_filename,pdf_status = process_pdf(article_bibcode,
                                               prefs=prefs,
@@ -366,7 +365,7 @@ def process_pdf(article_bibcode,
             os.fdopen(fd,'wb').write(response.content)
         if  'PDF document' in get_filetype(pdf_filename):
             pdf_status=True
-            logger.debug("try successed >>> {}".format(pdf_url))
+            logger.debug("try succeeded >>> {}".format(pdf_url))
             break
         else:
             logger.debug("try failed >>> {}".format(pdf_url))
@@ -404,7 +403,7 @@ def process_pdf_proxy(pdf_url,pdf_filename,user,server,port=22):
     
     if  'PDF document' in get_filetype(pdf_filename):
         pdf_status=True
-        logger.debug("try successed >>> {}".format(pdf_url))
+        logger.debug("try succeeded >>> {}".format(pdf_url))
     else:
         pdf_status=False
         logger.debug("try failed >>> {}".format(pdf_url))
