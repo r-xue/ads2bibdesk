@@ -11,6 +11,7 @@ import difflib
 import logging
 import tempfile
 import subprocess
+import socket
 
 # Dependent
 
@@ -79,25 +80,29 @@ The API key can be set with the following options:
         logging.getLogger('').setLevel(logger.info)
     """
     
-    fh = logging.FileHandler(log_path)
+    fh = logging.FileHandler(log_path, mode='a')
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(CustomFormatter())
     
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(CustomFormatter())
+
+    #toplogger=logging.getLogger('')
+    toplogger=logging.getLogger('ads2bibdesk')
+    toplogger.setLevel(logging.DEBUG)
+    toplogger.handlers=[]
+    toplogger.addHandler(fh)
+    toplogger.addHandler(ch)
     
-    rootlogger=logging.getLogger('')
-    rootlogger.addHandler(fh)
-    rootlogger.addHandler(ch)
-    
-    
-    if  'true' not in prefs['options']['debug'].lower(): 
-        rootlogger.setLevel(logging.INFO)
+    if  'true' not in prefs['options']['debug'].lower():
+        ch.setLevel(logging.INFO)
+        fh.setLevel(logging.INFO)
         ch.setFormatter('')
     else:
-        rootlogger.setLevel(logging.DEBUG)   
-    
+        ch.setLevel(logging.DEBUG)
+        fh.setLevel(logging.DEBUG)        
+
     logger.info("Starting ADS to BibDesk")
     logger.debug("ADS to BibDesk version {}".format(__version__))
     logger.debug("Python: {}".format(sys.version))        
@@ -167,10 +172,14 @@ def process_token(article_identifier, prefs, bibdesk):
     if  'dev_key' not in prefs['default']['ads_token']:
         ads.config.token = prefs['default']['ads_token']
     
+    #   field-id list:
+    #       https://github.com/adsabs/adsabs-dev-api/blob/master/Search_API.ipynb
+    #       https://adsabs.github.io/help/search/comprehensive-solr-term-list
+
     ads_query = ads.SearchQuery(identifier=article_identifier,
                               fl=['author','first_author',
                                   'bibcode','identifier','alternate_bibcode','id',
-                                  'year', 'title','abstract'])
+                                  'year', 'title','abstract','links_data'])
     try:
         ads_articles = list(ads_query)
     except:
@@ -345,7 +354,7 @@ def process_pdf(article_bibcode,
         if  'arxiv' in article_bibcode.lower() and 'pub' in fulltext_source.lower():
             continue
         pdf_url = article_gateway[fulltext_source+'_pdf']
-        logger.debug("process_pdf_local: {}".format(pdf_url))
+        logger.debug("try >>> {}".format(pdf_url))
         
         response = requests.get(pdf_url,allow_redirects=True,
                             headers={'User-Agent':
@@ -355,41 +364,52 @@ def process_pdf(article_bibcode,
         fd, pdf_filename = tempfile.mkstemp(suffix='.pdf')
         if  response.status_code!=404 and response.status_code!=403:
             os.fdopen(fd,'wb').write(response.content)
-        
         if  'PDF document' in get_filetype(pdf_filename):
             pdf_status=True
-            break        
-        
+            logger.debug("try successed >>> {}".format(pdf_url))
+            break
+        else:
+            logger.debug("try failed >>> {}".format(pdf_url))
+
         if  'pub' in fulltext_source and \
-            prefs['proxy']['ssh_user']!='None' and prefs['proxy']['ssh_server']!='None':
-            logger.debug("process_pdf_proxy: {}".format(pdf_url))
-            process_pdf_proxy(pdf_url,pdf_filename,
-                              prefs['proxy']['ssh_user'],
-                              prefs['proxy']['ssh_server'],
-                              port=prefs['proxy']['ssh_port'])
-            if  'PDF document' in get_filetype(pdf_filename):
-                pdf_status=True
-                break
-        
+            prefs['proxy']['ssh_user']!='None' and prefs['proxy']['ssh_server']!='None':    
+            pdf_status=process_pdf_proxy(pdf_url,pdf_filename,
+                                        prefs['proxy']['ssh_user'],
+                                        prefs['proxy']['ssh_server'],
+                                        port=prefs['proxy']['ssh_port'])
+            if  pdf_status==True:
+                break                                    
+
     return pdf_filename, pdf_status
 
 def process_pdf_proxy(pdf_url,pdf_filename,user,server,port=22):
-    
-    cmd1 = 'ssh -p {} {}@{} \"touch /tmp/adsbibdesk.pdf; '.format(port,user,server)
-    cmd1 += 'wget -O /tmp/adsbibdesk.pdf '
-    cmd1 += '--header=\\"Accept: text/html\\" '
-    cmd1 += '--user-agent=\\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 '
-    cmd1 += '(KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36\\" \\"{}\\"\"'.format(pdf_url)
-    cmd2 = 'scp -P {} -q {}@{}:/tmp/adsbibdesk.pdf {}'.format(port,user,server,pdf_filename)
 
-    logger.debug("process_pdf_proxy: {}".format(cmd1))
+    client=socket.gethostname().replace(' ','')
+    tmpfile='/tmp/adsbibdesk.{}.pdf'.format(client)
+    cmd1 = 'ssh -p {} {}@{} \"touch {}; '.format(port,user,server,tmpfile)
+    cmd1 += 'curl --output {} '.format(tmpfile)
+    cmd1 += '-J -L --referer \\";auto\\"  '
+    cmd1 += '--user-agent \\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 '
+    cmd1 += '(KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36\\" \\"{}\\"\"'.format(pdf_url)
+
+    cmd2 = 'scp -P {} -q {}@{}:{} {}'.format(port,user,server,tmpfile,pdf_filename)
+    
+    logger.debug("try >>> {}".format(pdf_url))
+    logger.debug("run >>> {}".format(cmd1))
     subprocess.Popen(cmd1, shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    logger.debug("process_pdf_proxy: {}".format(cmd2))
+    logger.debug("run >>> {}".format(cmd2))
     subprocess.Popen(cmd2, shell=True,
              stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()    
     
-    return
+    if  'PDF document' in get_filetype(pdf_filename):
+        pdf_status=True
+        logger.debug("try successed >>> {}".format(pdf_url))
+    else:
+        pdf_status=False
+        logger.debug("try failed >>> {}".format(pdf_url))
+
+    return pdf_status
 
 def get_article_gateway(article_bibcode,
                 gateway_url="https://ui.adsabs.harvard.edu/link_gateway"):
