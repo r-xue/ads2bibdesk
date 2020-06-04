@@ -179,7 +179,7 @@ def process_token(article_identifier, prefs, bibdesk):
     ads_query = ads.SearchQuery(identifier=article_identifier,
                               fl=['author','first_author',
                                   'bibcode','identifier','alternate_bibcode','id',
-                                  'year', 'title','abstract','links_data','esources'])
+                                  'year', 'title','abstract','links_data','esources','bibstem'])
     try:
         ads_articles = list(ads_query)
     except:
@@ -222,17 +222,14 @@ def process_token(article_identifier, prefs, bibdesk):
         logger.debug('   {}'.format(v))
     
     article_bibcode=ads_article.bibcode
-    gateway_url='https://ui.adsabs.harvard.edu/link_gateway'
+    article_esources=ads_article.esources
 
     if  'true' in prefs['options']['download_pdf'].lower():
-        pdf_filename,pdf_status = process_pdf(article_bibcode,
-                                              prefs=prefs,
-                                              gateway_url=gateway_url)     
+        pdf_filename,pdf_status = process_pdf(article_bibcode,article_esources,
+                                              prefs=prefs)     
     else:
         pdf_filename='.null'
 
-        
-        
     kept_pdfs = []
     kept_fields = {}
     kept_groups=[]    
@@ -300,9 +297,8 @@ def process_token(article_identifier, prefs, bibdesk):
     # add URLs as linked URL if not there yet
     urls = bibdesk('value of fields whose name ends with "url"',
                    pub, strlist=True)
-    if  'arxiv' in article_bibcode.lower():
-        article_gateway = get_article_gateway(article_bibcode,gateway_url=gateway_url)
-        urls+=[article_gateway['eprint_html']]
+    if  'EPRINT_HTML' in article_esources:
+        urls+=[get_esource_link(article_bibcode,esource_type='eprint_html')]
     
     urlspub = bibdesk('linked URLs', pub, strlist=True)
 
@@ -330,39 +326,64 @@ def process_token(article_identifier, prefs, bibdesk):
     # add back the static groups assignment
     if  kept_groups!=[]:
         new_groups=bibdesk.add_groups(pub,kept_groups) 
-        
     
     return True
 
     
-def process_pdf(article_bibcode,
+def process_pdf(article_bibcode,article_esources,
                 prefs=None,
-                fulltext_sources=['pub','eprint','ads'],
-                gateway_url="https://ui.adsabs.harvard.edu/link_gateway"):
+                esource_types=['pub_pdf','pub_html','eprint_pdf','ads_pdf','author_pdf']):
     """
-    fulltext_source='PUB' or 'EPRINT'
-    the new ads offers PDFs in urls like this:
-        https://ui.adsabs.harvard.edu/link_gateway/{bibcode}/{PUB/EPRINT/ADS}_{PDF/HTML}        
-    """
-    
-    article_gateway=get_article_gateway(article_bibcode,gateway_url=gateway_url)
+    article_bibcode:    ADS bibcode
+    article_esources:   esources available for this specific article
+    esource_types:      the esource type order to try for PDF downloading
+                        if one prefer arxiv pdf, set it to:
+                            [eprint_pdf','pub_pdf','pub_html',ads_pdf']
 
-    pdf_status=False
+    """
     
-    for fulltext_source in fulltext_sources:
-        if  'arxiv' in article_bibcode.lower() and 'pub' in fulltext_source.lower():
+    pdf_status = False
+    pdf_filename = '.null'
+    
+    # for the joural listed below, we will use the redirected html address to "guess" the PDF link
+
+    html_journals=['Natur','NatAs']
+    is_html_journal=any(html_journal in article_bibcode for html_journal in html_journals)
+
+    for esource_type in esource_types:
+
+        # if esource_type is not available, we will not move forward.
+        # if pub_pdf is available, we will not use pub_html.
+
+        if  esource_type.upper() not in article_esources:
             continue
-        pdf_url = article_gateway[fulltext_source+'_pdf']
+        if  'PUB_PDF' in article_esources and esource_type=='pub_html':   
+            continue
+
+        esource_url = get_esource_link(article_bibcode,esource_type=esource_type)
+
+        if  esource_type=='pub_html':
+            logger.debug("try >>> {}".format(esource_url))
+            response = requests.get(esource_url,allow_redirects=True,
+                                headers={'User-Agent':
+                                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
+                                    (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'})
+            final_esource_url=response.url
+            logger.debug("    >>> {}".format(final_esource_url))            
+            pdf_url = get_pdf_fromhtml(final_esource_url)
+        else:
+            pdf_url = esource_url
+
         logger.debug("try >>> {}".format(pdf_url))
-        
         response = requests.get(pdf_url,allow_redirects=True,
                             headers={'User-Agent':
                                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
                                 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'})
-        
+
         fd, pdf_filename = tempfile.mkstemp(suffix='.pdf')
         if  response.status_code!=404 and response.status_code!=403:
             os.fdopen(fd,'wb').write(response.content)
+        
         if  'PDF document' in get_filetype(pdf_filename):
             pdf_status=True
             logger.debug("try succeeded >>> {}".format(pdf_url))
@@ -370,7 +391,7 @@ def process_pdf(article_bibcode,
         else:
             logger.debug("try failed >>> {}".format(pdf_url))
 
-        if  'pub' in fulltext_source and \
+        if  'pub' in esource_type and \
             prefs['proxy']['ssh_user']!='None' and prefs['proxy']['ssh_server']!='None':    
             pdf_status=process_pdf_proxy(pdf_url,pdf_filename,
                                         prefs['proxy']['ssh_user'],
@@ -380,6 +401,22 @@ def process_pdf(article_bibcode,
                 break                                    
 
     return pdf_filename, pdf_status
+
+def get_pdf_fromhtml(url_html):
+    """
+    guess the PDF link from the journal article html url, only works for some journals
+    """
+
+    url_pdf=url_html+'.pdf'
+    
+    if  'nature.com' in url_html:
+        url_pdf = url_html+'.pdf'
+    if  'annualreviews.org' in url_html:
+        url_pdf = url_html.replace('/doi/','/doi/pdf/')
+    if  'link.springer.com' in url_html:
+        url_pdf = url_html.replace('book','content/pdf').replace('article','content/pdf')+'.pdf'
+
+    return url_pdf
 
 def process_pdf_proxy(pdf_url,pdf_filename,user,server,port=22):
 
@@ -410,27 +447,22 @@ def process_pdf_proxy(pdf_url,pdf_filename,user,server,port=22):
 
     return pdf_status
 
-def get_article_gateway(article_bibcode,
+def get_esource_link(article_bibcode,esource_type='pub_pdf',
                 gateway_url="https://ui.adsabs.harvard.edu/link_gateway"):
     """
-    fulltext_source='PUB' or 'EPRINT'
-    the new ads offers PDFs in urls like this:
+    ADS offers esource urls like this:
         https://ui.adsabs.harvard.edu/link_gateway/2001A%26A...366...62A/{PUB/EPRINT/ADS}_{PDF/HTML}
-    note: not necessarily all link works        
+    
+    Possible esource_type:
+        from publishers:    PUB_PDF, PUB_HTML
+        from arxiv:         EPRINT_PDF, EPRINT_HTML
+        from ADS:           ADS_PDF, ADS_SCAN
+        from author:        AUTHOR_PDF
+
+    note: not necessarily all esources are available for a article (please check fl='links_data')
+
     """
-        
-    ads_gateway={}
-    #   from publishers
-    ads_gateway['pub_pdf'] = gateway_url+'/'+article_bibcode+'/PUB_PDF'
-    ads_gateway['pub_html'] = gateway_url+'/'+article_bibcode+'/PUB_HTML'
-    #   from arxiv
-    ads_gateway['eprint_pdf'] = gateway_url+'/'+article_bibcode+'/EPRINT_PDF'
-    ads_gateway['eprint_html'] = gateway_url+'/'+article_bibcode+'/EPRINT_HTML'
-    #   from ads scan
-    ads_gateway['ads_pdf'] = gateway_url+'/'+article_bibcode+'/ADS_PDF'
-    ads_gateway['ads_html'] = gateway_url+'/'+article_bibcode+'/ADS_SCAN'
-        
-    return ads_gateway
+    return gateway_url+'/'+article_bibcode+'/'+esource_type.upper()
 
 def get_filetype(filename):
     x = subprocess.Popen('file "{}"'.format(filename), shell=True,
