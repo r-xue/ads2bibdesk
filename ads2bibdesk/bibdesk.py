@@ -1,10 +1,12 @@
 import subprocess
 import os
 
-import AppKit       #   from PyObjc rather than the "AppKit"-named module
+import AppKit       #   from pyobjc-framework-Cocoa
+app_info = AppKit.NSBundle.mainBundle().infoDictionary()
+app_info["LSBackgroundOnly"] = 1
 
 import logging
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class BibDesk(object):
     

@@ -119,6 +119,7 @@ setup(
                  'Programming Language :: Python :: 3',
                  'Programming Language :: Python :: 3.6',
                  'Programming Language :: Python :: 3.7',
+                 'Programming Language :: Python :: 3.8',
                  "Intended Audience :: Science/Research",
                  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
                  "Operating System :: MacOS :: MacOS X",
@@ -127,7 +128,7 @@ setup(
     include_package_data=True,
     entry_points={'console_scripts': ['ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
     python_requires='>=3.6, <4',
-    install_requires=['ads','requests','pyobjc'],
+    install_requires=['ads','requests','pyobjc-framework-Cocoa'],
     project_urls={'Bug Reports': 'https://github.com/r-xue/ads2bibdesk/issues',
                   'Source': 'https://github.com/r-xue/ads2bibdesk/'},
     cmdclass={'install': InstallCommand}
