@@ -259,12 +259,15 @@ def process_token(article_identifier, prefs, bibdesk):
                 # plus BibDesk annotation
                 kept_fields['BibDeskAnnotation'] = bibdesk(
                     'return its note', pid).stringValue()
-                kept_pdfs += bibdesk.safe_delete(pid)
+
                 notify('Duplicate publication removed',
-                       article_identifier, ads_article.title[0], alert_sound=alert_sound)
+                       bibdesk('cite key', pid).stringValue(), ads_article.title[0], alert_sound=alert_sound)                       
                 logger.info('Duplicate publication removed:')
-                logger.info(article_identifier)
-                logger.info(ads_article.title[0])              
+                logger.info(bibdesk('cite key', pid).stringValue())
+                logger.info(ads_article.title[0])   
+
+                kept_pdfs += bibdesk.safe_delete(pid)
+                
                 bibdesk.refresh()
 
     # add new entry
@@ -316,6 +319,7 @@ def process_token(article_identifier, prefs, bibdesk):
     for k, v in list(kept_fields.items()):
         if k not in newFields:
             bibdesk(f'set value of field "{(k, v)}" to "{pub}"')
+    
     notify('New publication added',
            bibdesk('cite key', pub).stringValue(),
            ads_article.title[0], alert_sound=alert_sound)
@@ -485,30 +489,38 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
  
     """   
     try:
-        if  alert_sound is None:
-            subprocess.Popen("""
-                      osascript -e 'display notification "{}" with title "{}" subtitle "{}"'
-                      """.format(desc,title,subtitle),
-                      shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        else:
-            subprocess.Popen("""
-                      osascript -e 'display notification "{}" with title "{}" subtitle "{}" sound name "{}"'
-                      """.format(desc,title,subtitle,alert_sound),
-                      shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
- 
+
+        from Foundation import NSUserNotification
+        from Foundation import NSUserNotificationCenter
+
+        notification = NSUserNotification.alloc().init()
+        center = NSUserNotificationCenter.defaultUserNotificationCenter()
+
+        notification.setTitle_(title)
+        notification.setInformativeText_(desc)
+        notification.setSubtitle_(subtitle)
+        if  alert_sound is not None:
+            notification.setSoundName_(alert_sound) # "NSUserNotificationDefaultSoundName"
+        #notification.setIdentifier_('org.python.python3')
+        center.deliverNotification_(notification)
+        notification.dealloc() 
+    
     except ExplicitException:
         
         try:
-            import objc
-            notification = objc.lookUpClass('NSUserNotification').alloc().init()
-            notification.setTitle_(title)
-            notification.setInformativeText_(desc)
-            notification.setSubtitle_(subtitle)
-            if  alert_sound is not None:
-                notification.setSoundName_(alert_sound) # "NSUserNotificationDefaultSoundName"
-            objc.lookUpClass('NSUserNotificationCenter').\
-                defaultUserNotificationCenter().scheduleNotification_(notification)
-            notification.dealloc()  
+
+            if  alert_sound is None:
+                subprocess.Popen("""
+                        osascript -e 'display notification "{}" with title "{}" subtitle "{}"'
+                        """.format(desc,title,subtitle),
+                        shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            else:
+                subprocess.Popen("""
+                        osascript -e 'display notification "{}" with title "{}" subtitle "{}" sound name "{}"'
+                        """.format(desc,title,subtitle,alert_sound),
+                        shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+
+
         except ExplicitException:
             pass
 

@@ -11,8 +11,8 @@ The command line script can be installed via one of these commands:
 
 To have the MacOS service installed at the same time, run one of the following options instead:
 
-    pip install --user --install-option="--service" ads2bibdesk    # from PyPI (broken at this moment)
-    python setup.py install --user --service                       # from a local copy
+    pip install -v --user --install-option="--service" ads2bibdesk      # from PyPI 
+    python setup.py install --user --service                            # from a local copy
     
 Uninstall:
 
@@ -84,25 +84,34 @@ class InstallCommand(install):
             cl_path=self.install_scripts
             cl_path=cl_path+'/ads2bibdesk'
 
-            service_path = rel_path(os.path.join(
-                            "service","Add to BibDesk.workflow",
+            service_wflow = rel_path(os.path.join("service","Add to BibDesk.workflow",
                             "Contents", "document.wflow"))
-            for workflow in [service_path]:
-                #print(workflow)
+            app_wflow = rel_path(os.path.join("service", "Add to BibDesk.app",
+                            "Contents", "document.wflow"))                            
+            
+            for idx, workflow in enumerate([service_wflow, app_wflow]):
                 with open(workflow, 'rb') as fp:
                     pl = plistlib.load(fp)
-                    pl['actions'][0]['action']['ActionParameters']['COMMAND_STRING']=cl_path+' "$1"'
+                    pl['actions'][idx]['action']['ActionParameters']['COMMAND_STRING']=cl_path+' "$1"'
                 with open(workflow, 'wb') as fp:
                     plistlib.dump(pl, fp)
-
-                logger.info('Saving "{}"'.format(workflow))
+                    logger.info('Saving "{}"'.format(workflow))
             logger.info("Completed ADS to BibDesk build step")
 
-            workflow_ads2bibdesk=rel_path(os.path.join("service","Add to BibDesk.workflow"))
-            workflow_ads2bibdesk=workflow_ads2bibdesk.replace(' ','\ ')
-            workflow_system='~/Library/Services/'
-            logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
-            os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)
+            service_path = rel_path(os.path.join("service","Add to BibDesk.workflow"))
+            app_path = rel_path(os.path.join("service", "Add to BibDesk.app"))
+
+            downloads_system = '~/Downloads/'
+            for tmppath in [service_path, app_path]:
+                logger.info('Copy the workflow from "{}" to "{}"'.format(tmppath,downloads_system))
+                os.system('cp -rf '+tmppath.replace(' ','\ ')+' '+downloads_system)
+
+            #logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
+            #workflow_ads2bibdesk=rel_path(os.path.join("service","Add to BibDesk.workflow"))
+            #workflow_ads2bibdesk=workflow_ads2bibdesk.replace(' ','\ ')
+            #workflow_system='~/Library/Services/'
+            #logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
+            #os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)
 
 
 setup(
