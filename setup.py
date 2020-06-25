@@ -35,11 +35,12 @@ import sys
 from setuptools import setup, Command
 from setuptools.command.install import install
 
-if  sys.version_info < (3, 6):
+if sys.version_info < (3, 6):
     raise Exception("ads2bibdesk requires Python 3.6 or higher.")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 def read(fname):
     with open(rel_path(fname), 'r') as fh:
@@ -50,12 +51,14 @@ def get_version():
     version_file = read('ads2bibdesk/__init__.py')
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
-    if  version_match:
+    if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+
 def rel_path(path):
     return os.path.join(os.path.dirname(__file__), path)
+
 
 class InstallCommand(install):
 
@@ -78,40 +81,36 @@ class InstallCommand(install):
 
         install.run(self)
 
-        service = self.service # will be 1 or None
-        if  service is not None:
+        service = self.service  # will be 1 or None
+        if service is not None:
 
-            cl_path=self.install_scripts
-            cl_path=cl_path+'/ads2bibdesk'
+            cl_path = self.install_scripts
+            cl_path = cl_path+'/ads2bibdesk'
 
-            service_wflow = rel_path(os.path.join("service","Add to BibDesk.workflow",
-                            "Contents", "document.wflow"))
+            service_wflow = rel_path(os.path.join("service", "Add to BibDesk.workflow",
+                                                  "Contents", "document.wflow"))
             app_wflow = rel_path(os.path.join("service", "Add to BibDesk.app",
-                            "Contents", "document.wflow"))                            
-            
+                                              "Contents", "document.wflow"))
+
             for idx, workflow in enumerate([service_wflow, app_wflow]):
                 with open(workflow, 'rb') as fp:
                     pl = plistlib.load(fp)
-                    pl['actions'][idx]['action']['ActionParameters']['COMMAND_STRING']=cl_path+' "$1"'
+                    pl['actions'][idx]['action']['ActionParameters']['COMMAND_STRING'] = cl_path+' "$1"'
                 with open(workflow, 'wb') as fp:
                     plistlib.dump(pl, fp)
                     logger.info('Saving "{}"'.format(workflow))
             logger.info("Completed ADS to BibDesk build step")
 
-            service_path = rel_path(os.path.join("service","Add to BibDesk.workflow"))
+            service_path = rel_path(os.path.join(
+                "service", "Add to BibDesk.workflow"))
             app_path = rel_path(os.path.join("service", "Add to BibDesk.app"))
 
             downloads_system = '~/Downloads/'
             for tmppath in [service_path, app_path]:
-                logger.info('Copy the workflow from "{}" to "{}"'.format(tmppath,downloads_system))
-                os.system('cp -rf '+tmppath.replace(' ','\ ')+' '+downloads_system)
-
-            #logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
-            #workflow_ads2bibdesk=rel_path(os.path.join("service","Add to BibDesk.workflow"))
-            #workflow_ads2bibdesk=workflow_ads2bibdesk.replace(' ','\ ')
-            #workflow_system='~/Library/Services/'
-            #logger.info('Copy the workflow from "{}" to "{}"'.format(workflow_ads2bibdesk,workflow_system))
-            #os.system('cp -rf '+workflow_ads2bibdesk+' '+workflow_system)
+                logger.info('Copy the workflow from "{}" to "{}"'.format(
+                    tmppath, downloads_system))
+                os.system('cp -rf '+tmppath.replace(' ', '\ ') +
+                          ' '+downloads_system)
 
 
 setup(
@@ -135,9 +134,10 @@ setup(
                  "Topic :: Scientific/Engineering :: Astronomy"],
     packages=["ads2bibdesk"],
     include_package_data=True,
-    entry_points={'console_scripts': ['ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
+    entry_points={'console_scripts': [
+        'ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
     python_requires='>=3.6, <4',
-    install_requires=['ads','requests','pyobjc-framework-Cocoa'],
+    install_requires=['ads', 'requests', 'pyobjc-framework-Cocoa'],
     project_urls={'Bug Reports': 'https://github.com/r-xue/ads2bibdesk/issues',
                   'Source': 'https://github.com/r-xue/ads2bibdesk/'},
     cmdclass={'install': InstallCommand}

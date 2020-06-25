@@ -35,12 +35,10 @@ The command line script can be installed via::
     pip install --user git+https://github.com/r-xue/ads2bibdesk.git # from GitHub
     pip install --user ads2bibdesk                                  # from PyPI (likely behind the GitHub version) 
     pip install --user .                                            # from a local copy 
-    pip install --user -e .                                         # from a local copy, "Editable" install
 
 To have the macOS app and `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.15/mac/10.15>`_ built at the same time, run one of the following options instead::
 
-    pip install --user --upgrade --install-option="--service" .               # from a local copy
-    pip install --user --upgrade --install-option="--service" ads2bibdesk     # from PyPI
+    pip install --user -U --no-deps --force-reinstall --install-option="--service" ads2bibdesk     # from PyPI
 
 The option "--service" will create two files ``Add to BibDesk.workflow`` and ``Add to BibDesk.app`` in ``~/Downloads/``. To install the service, click ``Add to BibDesk.workflow`` and it will be moved to ``~/Library/Services/``. For the app, just drag and drop it to any preferred location. 
 
