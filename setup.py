@@ -137,7 +137,7 @@ setup(
     entry_points={'console_scripts': [
         'ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
     python_requires='>=3.6, <4',
-    install_requires=['ads', 'requests', 'pyobjc-framework-Cocoa'],
+    install_requires=['ads', 'requests', 'lxml', 'pyobjc-framework-Cocoa'],
     project_urls={'Bug Reports': 'https://github.com/r-xue/ads2bibdesk/issues',
                   'Source': 'https://github.com/r-xue/ads2bibdesk/'},
     cmdclass={'install': InstallCommand}
