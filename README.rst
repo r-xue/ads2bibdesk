@@ -30,13 +30,17 @@ Quickstart
 
 Installation
 ~~~~~~~~~~~~
-The command line script can be installed via::
+The command line script can be installed via:
+
+.. code-block:: bash
 
     pip install --user git+https://github.com/r-xue/ads2bibdesk.git # from GitHub
     pip install --user ads2bibdesk                                  # from PyPI (likely behind the GitHub version) 
     pip install --user .                                            # from a local copy 
 
-To have the macOS app and `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.15/mac/10.15>`_ built at the same time, run one of the following options instead::
+To have the macOS app and `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.15/mac/10.15>`_ built at the same time, run one of the following options instead:
+
+.. code-block:: bash
 
     pip install --user -U --no-deps --force-reinstall --install-option="--service" ads2bibdesk     # from PyPI
 
