@@ -17,6 +17,7 @@ import socket
 
 import ads
 import requests
+from lxml import html
 
 from .bibdesk import BibDesk
 from .prefs import Preferences
@@ -358,12 +359,6 @@ def process_pdf(article_bibcode, article_esources,
     pdf_status = False
     pdf_filename = '.null'
 
-    # for the joural listed below, we will use the redirected html address to "guess" the PDF link
-
-    html_journals = ['Natur', 'NatAs']
-    is_html_journal = any(
-        html_journal in article_bibcode for html_journal in html_journals)
-
     for esource_type in esource_types:
 
         # if esource_type is not available, we will not move forward.
@@ -383,9 +378,8 @@ def process_pdf(article_bibcode, article_esources,
                                     headers={'User-Agent':
                                              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
                                     (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'})
-            final_esource_url = response.url
-            logger.debug("    >>> {}".format(final_esource_url))
-            pdf_url = get_pdf_fromhtml(final_esource_url)
+            logger.debug("    >>> {}".format(response.url))
+            pdf_url = get_pdf_fromhtml(response)
         else:
             pdf_url = esource_url
 
@@ -418,21 +412,22 @@ def process_pdf(article_bibcode, article_esources,
     return pdf_filename, pdf_status
 
 
-def get_pdf_fromhtml(url_html):
+def get_pdf_fromhtml(response):
     """
     guess the PDF link from the journal article html url, only works for some journals
     """
-
+    url_html = response.url
+    
     url_pdf = url_html+'.pdf'
+    
+    tree = html.fromstring(response.content)
+    citation_pdf_url = tree.xpath("//meta[@name='citation_pdf_url']/@content")
+    if  len(citation_pdf_url) != 0:
+        url_pdf = citation_pdf_url[0]
 
-    if 'nature.com' in url_html:
-        url_pdf = url_html+'.pdf'
     if 'annualreviews.org' in url_html:
         url_pdf = url_html.replace('/doi/', '/doi/pdf/')
-    if 'link.springer.com' in url_html:
-        url_pdf = url_html.replace(
-            'book', 'content/pdf').replace('article', 'content/pdf')+'.pdf'
-
+    
     return url_pdf
 
 
