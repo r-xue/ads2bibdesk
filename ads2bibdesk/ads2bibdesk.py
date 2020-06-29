@@ -523,7 +523,7 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
         center.deliverNotification_(notification)
         notification.dealloc()
 
-    except ExplicitException:
+    except Exception:
 
         try:
 
@@ -538,7 +538,7 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
                         """.format(desc, title, subtitle, alert_sound),
                                  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
-        except ExplicitException:
+        except Exception:
             pass
 
 
