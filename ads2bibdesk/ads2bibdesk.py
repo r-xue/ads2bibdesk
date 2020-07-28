@@ -350,6 +350,9 @@ def process_pdf(article_bibcode, article_esources,
     """
     article_bibcode:    ADS bibcode
     article_esources:   esources available for this specific article
+        note: PUB_PDF is not always pointing to the actual PDF:
+            e.g. https://ui.adsabs.harvard.edu/abs/2015Sci...348..779H
+                so we will go through all esource_types x (local,proxy)
     esource_types:      the esource type order to try for PDF downloading
                         if one prefer arxiv pdf, set it to:
                             [eprint_pdf','pub_pdf','pub_html',ads_pdf']
@@ -366,9 +369,7 @@ def process_pdf(article_bibcode, article_esources,
 
         if esource_type.upper() not in article_esources:
             continue
-        if 'PUB_PDF' in article_esources and esource_type == 'pub_html':
-            continue
-
+        
         esource_url = get_esource_link(
             article_bibcode, esource_type=esource_type)
 
@@ -427,6 +428,10 @@ def get_pdf_fromhtml(response):
 
     if 'annualreviews.org' in url_html:
         url_pdf = url_html.replace('/doi/', '/doi/pdf/')
+
+    if 'link.springer.com' in url_html:
+        url_pdf = url_html.replace(
+            'book', 'content/pdf').replace('article', 'content/pdf')+'.pdf'        
     
     return url_pdf
 
