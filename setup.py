@@ -112,6 +112,10 @@ class InstallCommand(install):
                 os.system('cp -rf '+tmppath.replace(' ', '\ ') +
                           ' '+downloads_system)
 
+            with open(os.path.expanduser(os.path.join(downloads_system, "Add to BibDesk.scpt")),'w') as scpt:
+                scpt.write('set savedClipboard to the clipboard\n')
+                scpt.write('do shell script ("{} -d " & savedClipboard)\n'.format(cl_path))
+
 
 setup(
     name='ads2bibdesk',
