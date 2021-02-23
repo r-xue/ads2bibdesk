@@ -1,13 +1,16 @@
+import logging
 import subprocess
 import os
 
-import AppKit       #   from PyObjc rather than the "AppKit"-named module
+import AppKit  # from pyobjc-framework-Cocoa
+app_info = AppKit.NSBundle.mainBundle().infoDictionary()
+app_info["LSBackgroundOnly"] = 1
 
-import logging
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
 
 class BibDesk(object):
-    
+
     def __init__(self):
         """
         Manage BibDesk publications using AppKit
@@ -23,15 +26,17 @@ class BibDesk(object):
         :param strlist: return output as list of string
         :param error: return full output of call, including error
         """
-        if  pid is None:
+        if pid is None:
             # address all publications
-            cmd = 'tell first document of application "BibDesk" to {}'.format(cmd)
+            cmd = 'tell first document of application "BibDesk" to {}'.format(
+                cmd)
         else:
             # address a single publication
             cmd = 'tell first document of application "BibDesk" to '\
-                  'tell first publication whose id is "{}" to {}'.format(pid, cmd)
+                  'tell first publication whose id is "{}" to {}'.format(
+                      pid, cmd)
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        if  not error:
+        if not error:
             output = output[0]
             if strlist:
                 # objective C nuisances...
@@ -93,13 +98,13 @@ class BibDesk(object):
         self('delete', pid)
         return keptPDFs
 
-    def get_groups(self,pid):
+    def get_groups(self, pid):
         """
         Get names of the static groups
         return a string list
             output:      list        
         """
-        cmd="""
+        cmd = """
             tell first document of application "BibDesk"
             set oldPub to ( get first publication whose id is "{}" ) 
             set pGroups to ( get static groups whose publications contains oldPub ) 
@@ -112,13 +117,14 @@ class BibDesk(object):
         """.format(pid)
 
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        output=output[0]
+        output = output[0]
         output = [output.descriptorAtIndex_(i + 1).stringValue()
                   for i in range(output.numberOfItems())]
-        logger.debug("check static groups: pid: {}; static group: {}".format(pid,output))
+        logger.debug(
+            "check static groups: pid: {}; static group: {}".format(pid, output))
         return output
-    
-    def add_groups(self,pid,groups):
+
+    def add_groups(self, pid, groups):
         """
         add the publication into static groups
         note:
@@ -128,8 +134,8 @@ class BibDesk(object):
             pid:         string
             groups:      list
         """
-        as_groups=", ".join(['\"'+x+'\"' for x in groups])
-        cmd="""
+        as_groups = ", ".join(['\"'+x+'\"' for x in groups])
+        cmd = """
             tell first document of application "BibDesk"
                 set newPub to ( get first publication whose id is "{}" )
                 #set AppleScript's text item delimiters to return
@@ -138,11 +144,11 @@ class BibDesk(object):
                     add newPub to theGroup
                 end repeat
             end tell
-        """.format(pid,as_groups)
+        """.format(pid, as_groups)
         output = self.app.initWithSource_(cmd).executeAndReturnError_(None)
-        new_groups=self.get_groups(pid)
+        new_groups = self.get_groups(pid)
         return new_groups
-    
+
 
 def has_annotationss(f):
     """
@@ -150,4 +156,4 @@ def has_annotationss(f):
     return subprocess.Popen(
         "strings {} | grep  -E 'Contents[ ]{{0,1}}\('".format(f),
         shell=True, stdout=subprocess.PIPE,
-        stderr=open('/dev/null', 'w')).stdout.read() != b''     # b''!=u'' in Python 3    
+        stderr=open('/dev/null', 'w')).stdout.read() != b''     # b''!=u'' in Python 3

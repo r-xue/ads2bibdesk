@@ -1,3 +1,4 @@
 include LICENSE
 include ads2bibdesk/ads2bibdesk.cfg.default
 recursive-include service/Add?to?BibDesk.workflow *
+recursive-include service/Add?to?BibDesk.app *

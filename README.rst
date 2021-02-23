@@ -30,29 +30,35 @@ Quickstart
 
 Installation
 ~~~~~~~~~~~~
-The command line script can be installed via::
+The command line script can be installed via:
+
+.. code-block:: bash
 
     pip install --user git+https://github.com/r-xue/ads2bibdesk.git # from GitHub
     pip install --user ads2bibdesk                                  # from PyPI (likely behind the GitHub version) 
     pip install --user .                                            # from a local copy 
-    pip install --user -e .                                         # from a local copy, "Editable" install
 
-To have the macOS `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.14/mac/10.14>`_ (`workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_) installed at the same time, run one of the following options instead::
+To build the macOS app and `service <https://support.apple.com/guide/mac-help/use-services-in-apps-mchlp1012/10.15/mac/10.15>`_ workflow, you need to further run:
 
-    pip install --user --install-option="--service" .               # from a local copy
-    pip install --user --install-option="--service" ads2bibdesk     # from PyPI
+.. code-block:: bash
 
-The option "--service" will copy the optional macOS workflow file ``Add to BibDesk.workflow`` to ``~/Library/Services/``, with an updated command-line script path specific for your installation.
+    pip install --user -U --no-deps --force-reinstall --install-option="--service" ads2bibdesk     # from PyPI
+
+The option "--service" will create two files ``Add to BibDesk.workflow`` and ``Add to BibDesk.app`` in ``~/Downloads/``. To install the service, click ``Add to BibDesk.workflow`` and it will be moved to ``~/Library/Services/``. For the app, just drag and drop it to any preferred location. 
 
 Note: 
 
 * Only Python >=3.7 is supported (see below_). 
 * With the "--user" option, you must add the user-level bin directory (e.g., ``~/Library/Python/3.X/bin``) to your PATH environment variable in order to launch **ads2bibdesk**.
-* The macOS workflow is not working properly on macOS 10.14 Mojave and 10.15 Catalina (see this `issue <https://github.com/r-xue/ads2bibdesk/issues/8>`_)
+* Both the macOS service and app are based on the Automator `workflow <https://support.apple.com/guide/automator/create-a-workflow-aut7cac58839/mac>`_). They simply wrap around the command line program and serve as its shortcuts.
+* The service shortcut will not work within some applications (e.g., Safari) on macOS >=10.14 due to new privacy and security features built in macOS (see this `issue <https://github.com/r-xue/ads2bibdesk/issues/8>`_)
 
 
 Usage
 ~~~~~
+
+From the Command line
+^^^^^^^^^^^^^^^^^^^^^
 
 Add or update a new article from ADS::
 
@@ -71,6 +77,17 @@ A full summary of **ads2bibdesk** commands is available via::
 
     ads2bibdesk --help
 
+From the macOS app
+^^^^^^^^^^^^^^^^^^
+
+1. Copy the article identifider to the clipboard, in any application 
+2. launch ``Add to BibDesk.app``
+
+From the macOS service
+^^^^^^^^^^^^^^^^^^^^^^
+
+1. Highligh and right-click on the article identifider
+2. Choose 'Services > Add to Bibdesk' from the right-click menu
 
 Compatibility and Dependency
 ============================
