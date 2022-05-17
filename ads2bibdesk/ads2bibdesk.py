@@ -39,11 +39,11 @@ to your BibDesk database using the ADS Developer API
 
 Different from J.Sick's original `ads_bibdesk` or `adsbibdesk`, ads2bibdesk require the user
 to specify a personal ADS API key (per the new ADS policy). The metadata query will be performed
-using the API python client maintained by Andy Casey: 
+using the API python client maintained by Andy Casey:
   http://ads.readthedocs.io
 
 The API key can be set with the following options:
- - your ads2bibdesk preference file: ~/.ads/ads2bibdesk.cfg, 
+ - your ads2bibdesk preference file: ~/.ads/ads2bibdesk.cfg,
  - the API client key file: ~/.ads/dev_key
  - an environment variable named ADS_DEV_KEY (following the ads python package's instruction)
 
@@ -76,8 +76,8 @@ The API key can be set with the following options:
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s %(name)s %(levelname)s %(message)s',
-        filename=log_path)  
-    if  'true' not in prefs['options']['debug'].lower(): 
+        filename=log_path)
+    if  'true' not in prefs['options']['debug'].lower():
         logging.getLogger('').setLevel(logger.info)
     """
 
@@ -266,13 +266,14 @@ def process_token(article_identifier, prefs, bibdesk):
                 kept_fields['BibDeskAnnotation'] = bibdesk(
                     'return its note', pid).stringValue()
 
-                notify('Duplicate publication removed',
-                       bibdesk('cite key', pid).stringValue(), ads_article.title[0], alert_sound=alert_sound)
-                logger.info('Duplicate publication removed:')
-                logger.info(bibdesk('cite key', pid).stringValue())
-                logger.info(ads_article.title[0])
+                if 'true' in prefs['options']['remove_duplicate'].lower():
+                    notify('Duplicate publication removed',
+                           bibdesk('cite key', pid).stringValue(), ads_article.title[0], alert_sound=alert_sound)
+                    logger.info('Duplicate publication removed:')
+                    logger.info(bibdesk('cite key', pid).stringValue())
+                    logger.info(ads_article.title[0])
 
-                kept_pdfs += bibdesk.safe_delete(pid)
+                    kept_pdfs += bibdesk.safe_delete(pid)
 
                 bibdesk.refresh()
 
@@ -369,7 +370,7 @@ def process_pdf(article_bibcode, article_esources,
 
         if esource_type.upper() not in article_esources:
             continue
-        
+
         esource_url = get_esource_link(
             article_bibcode, esource_type=esource_type)
 
@@ -418,9 +419,9 @@ def get_pdf_fromhtml(response):
     guess the PDF link from the journal article html url, only works for some journals
     """
     url_html = response.url
-    
+
     url_pdf = url_html+'.pdf'
-    
+
     tree = html.fromstring(response.content)
     citation_pdf_url = tree.xpath("//meta[@name='citation_pdf_url']/@content")
     if  len(citation_pdf_url) != 0:
@@ -431,8 +432,8 @@ def get_pdf_fromhtml(response):
 
     if 'link.springer.com' in url_html:
         url_pdf = url_html.replace(
-            'book', 'content/pdf').replace('article', 'content/pdf')+'.pdf'        
-    
+            'book', 'content/pdf').replace('article', 'content/pdf')+'.pdf'
+
     return url_pdf
 
 
@@ -500,7 +501,7 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
     Publish a notification to Notification Center:
         try the applescript method first, then the "objc" method
 
-    note: 
+    note:
         the applescript method only work with Mavericks (10.9) and later
         alert_sound: 'Frog','Blow', 'Pop' etc. or None
 

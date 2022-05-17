@@ -18,20 +18,21 @@ class Preferences(object):
 
         prefs = ConfigParser(interpolation=ExtendedInterpolation())
         prefs.read_string("""
-        
+
             [default]
             ads_token = dev_key
-            
+
             [proxy]
             ssh_user = None
             ssh_server = None
             ssh_port = 22
-            
+
             [options]
             download_pdf = True
+            remove_duplicate = True
             alert_sound = True
-            debug = False            
-                          
+            debug = False
+
             """)
         prefs_dir = os.path.dirname(self.prefs_path)
 
