@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-
 The command line script can be installed via one of these commands:
 
     pip install --user .               $ from a local copy 
@@ -129,9 +128,10 @@ setup(
     keywords="bibtex astronomy ADS",
     classifiers=['Development Status :: 4 - Beta',
                  'Programming Language :: Python :: 3',
-                 'Programming Language :: Python :: 3.6',
-                 'Programming Language :: Python :: 3.7',
                  'Programming Language :: Python :: 3.8',
+                 'Programming Language :: Python :: 3.9',
+                 'Programming Language :: Python :: 3.10',
+                 'Programming Language :: Python :: 3.11',
                  "Intended Audience :: Science/Research",
                  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
                  "Operating System :: MacOS :: MacOS X",
@@ -140,7 +140,7 @@ setup(
     include_package_data=True,
     entry_points={'console_scripts': [
         'ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
-    python_requires='>=3.6, <4',
+    python_requires='>=3.8, <4',
     install_requires=['ads', 'requests', 'lxml', 'pyobjc-framework-Cocoa'],
     project_urls={'Bug Reports': 'https://github.com/r-xue/ads2bibdesk/issues',
                   'Source': 'https://github.com/r-xue/ads2bibdesk/'},
