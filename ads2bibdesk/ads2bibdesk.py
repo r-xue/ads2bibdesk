@@ -203,7 +203,7 @@ def process_token(article_identifier, prefs, bibdesk):
     article_bibcode = ads_article.bibcode
     article_esources = ads_article.esources
 
-    if 'true' in prefs['options']['download_pdf'].lower():
+    if 'true' in prefs['options']['download_pdf'].lower() and article_esources is not None:
         pdf_filename, pdf_status = process_pdf(article_bibcode, article_esources,
                                                prefs=prefs)
     else:
@@ -283,7 +283,7 @@ def process_token(article_identifier, prefs, bibdesk):
     # add URLs as linked URL if not there yet
     urls = bibdesk('value of fields whose name ends with "url"',
                    pub, strlist=True)
-    if 'EPRINT_HTML' in article_esources:
+    if article_esources is not None and 'EPRINT_HTML' in article_esources:
         urls += [get_esource_link(article_bibcode, esource_type='eprint_html')]
 
     urlspub = bibdesk('linked URLs', pub, strlist=True)
