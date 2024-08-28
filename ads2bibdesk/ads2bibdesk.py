@@ -319,16 +319,18 @@ def process_token(article_identifier, prefs, bibdesk, skip_bibcode=False):
 
     logger.debug("API limits {}".format(ads_query.response.get_ratelimits()))
 
-    if len(ads_articles) != 1:
-        logger.debug(
-            'Zero or Multiple ADS entries for the article identifiier: {}'.format(article_identifier))
-        logger.debug('Matching Number: {}'.format(len(ads_articles)))
-        notify('Found Zero or Multiple ADS antries for ',
-               article_identifier, ' No update in BibDesk', alert_sound=alert_sound)
-        logger.info("Found Zero or Multiple ADS antries for {}".format(
-            article_identifier))
-        logger.info("No update in BibDesk")
+    if not ads_articles:
+        notify('Found Zero ADS entry for', article_identifier, 'No update in BibDesk', alert_sound=alert_sound)
+        logger.warning("Found Zero ADS entry for the article identifier: {}".format(article_identifier))
+        logger.warning("No update in BibDesk")
         return False
+
+    if len(ads_articles) > 1:
+        notify('Found Multiple ADS entries for',
+               article_identifier, 'Update with the first entry in BibDesk', alert_sound=alert_sound)
+        logger.warning("Found Multiple ADS entries for the article identifier: {}".format(article_identifier))
+        logger.warning('Matching Number: {}'.format(len(ads_articles)))
+        logger.warning('Update with the first entry in BibDesk')
 
     ads_article = ads_articles[0]
     logger.info(f'Query identifier  : {article_identifier}')
