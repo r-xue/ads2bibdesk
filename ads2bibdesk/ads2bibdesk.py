@@ -150,6 +150,11 @@ def process_token(article_identifier, prefs, bibdesk):
     if 'dev_key' not in prefs['default']['ads_token']:
         ads.config.token = prefs['default']['ads_token']
 
+    # Parse DOI URLs, e.g. https://doi.org/10.1093/mnras/stt1769
+    if 'doi' in article_identifier.lower():
+        ii = article_identifier.find('10.')
+        article_identifier = article_identifier[ii:]
+
     #   field-id list:
     #       https://github.com/adsabs/adsabs-dev-api/blob/master/Search_API.ipynb
     #       https://adsabs.github.io/help/search/comprehensive-solr-term-list
