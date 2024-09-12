@@ -1,85 +1,71 @@
 #!/usr/bin/env python
 
-# Standard
-
-import os
-import sys
-
 import argparse
-
 import difflib
 import logging
-import tempfile
-import subprocess
+import os
 import socket
-
-# Dependent
+import subprocess
+import sys
+import tempfile
+import textwrap
 
 import ads
 import requests
 from lxml import html
 
+from . import __version__
 from .bibdesk import BibDesk
 from .prefs import Preferences
-from . import __version__
 
-import logging
 logger = logging.getLogger(__name__)
 
 
 def main():
-    """
-    Parse options and launch main loop
-    """
+    """Parse options and launch main loop."""
+    description = r"""
 
-    description = """
+        ads2bibdesk helps you add astrophysics articles listed on NASA/ADS to your BibDesk database
+        using the ADS Developer API
 
-ads2bibdesk helps you add astrophysics articles listed on NASA/ADS
-to your BibDesk database using the ADS Developer API
+        Different from J.Sick's original `ads_bibdesk` or `adsbibdesk`, ads2bibdesk require the user
+        to specify a personal ADS API key (per the new ADS policy). The metadata query will be performed
+        using the API python client maintained by Andy Casey: 
+        http://ads.readthedocs.io
 
-Different from J.Sick's original `ads_bibdesk` or `adsbibdesk`, ads2bibdesk require the user
-to specify a personal ADS API key (per the new ADS policy). The metadata query will be performed
-using the API python client maintained by Andy Casey: 
-  http://ads.readthedocs.io
+        The API key can be set with the following options:
+            * your ads2bibdesk preference file: ~/.ads/ads2bibdesk.cfg, 
+            * the API client key file: ~/.ads/dev_key
+            * an environment variable named ADS_DEV_KEY (following the ads python package's instruction)
 
-The API key can be set with the following options:
- - your ads2bibdesk preference file: ~/.ads/ads2bibdesk.cfg, 
- - the API client key file: ~/.ads/dev_key
- - an environment variable named ADS_DEV_KEY (following the ads python package's instruction)
+        """
 
-"""
-
-    parser = argparse.ArgumentParser(description=description,
+    parser = argparse.ArgumentParser(description=textwrap.dedent(description),
                                      formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('-d', '--debug',
                         dest="debug", action="store_true",
                         help="Debug mode; prints extra statements")
 
+    article_identifier_help = """\
+        The identifier of an article could be:
+            * ADS bibcode (e.g. 1998ApJ...500..525S, 2019arXiv190404507R)
+            * arXiv identifier (e.g. 0911.4956).
+            * article doi (e.g. 10.3847/1538-4357/aafd37)
+        """
+
     parser.add_argument('article_identifier', type=str,
-                        help="""The identifier of an article could be:
-  - ADS bibcode (e.g. 1998ApJ...500..525S, 2019arXiv190404507R)
-  - arXiv identifier (e.g. 0911.4956).
-  - article doi (e.g. 10.3847/1538-4357/aafd37)""")
+                        help=textwrap.dedent(article_identifier_help))
 
     args = parser.parse_args()
 
     prefs_class = Preferences()
     prefs = prefs_class.prefs
     log_path = prefs_class.log_path
-    prefs_path = prefs_class.prefs_path
 
-    if args.debug == True:
+    if args.debug:
         prefs['options']['debug'] = 'True'
 
-    """
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s %(name)s %(levelname)s %(message)s',
-        filename=log_path)  
-    if  'true' not in prefs['options']['debug'].lower(): 
-        logging.getLogger('').setLevel(logger.info)
-    """
 
     fh = logging.FileHandler(log_path, mode='a')
     fh.setLevel(logging.DEBUG)
@@ -90,11 +76,11 @@ The API key can be set with the following options:
     ch.setFormatter(CustomFormatter())
 
     # toplogger=logging.getLogger('')
-    toplogger = logging.getLogger('ads2bibdesk')
-    toplogger.setLevel(logging.DEBUG)
-    toplogger.handlers = []
-    toplogger.addHandler(fh)
-    toplogger.addHandler(ch)
+    a2b_logger = logging.getLogger('ads2bibdesk')
+    a2b_logger.setLevel(logging.DEBUG)
+    a2b_logger.handlers = []
+    a2b_logger.addHandler(fh)
+    a2b_logger.addHandler(ch)
 
     if 'true' not in prefs['options']['debug'].lower():
         ch.setLevel(logging.INFO)
@@ -108,13 +94,11 @@ The API key can be set with the following options:
     logger.debug("ADS to BibDesk version {}".format(__version__))
     logger.debug("Python: {}".format(sys.version))
 
-    article_status = process_article(args, prefs)
+    _ = process_article(args, prefs)
 
 
 class CustomFormatter(logging.Formatter):
-    """
-    customized logging formatter which can handle mutiple-line msgs
-    """
+    """customized logging formatter which can handle mutiple-line msgs."""
 
     def format(self, record: logging.LogRecord):
         save_msg = record.msg
@@ -135,13 +119,10 @@ class CustomFormatter(logging.Formatter):
 
 
 def process_article(args, prefs):
-    """
-    """
+    """Process an artifile."""
 
     bibdesk = BibDesk()
-
     article_status = process_token(args.article_identifier, prefs, bibdesk)
-
     bibdesk.app.dealloc()
 
     return article_status
@@ -159,11 +140,6 @@ def process_token(article_identifier, prefs, bibdesk):
         A `Preferences` instance.
     bibdesk : :class:`BibDesk`
         A `BibDesk` AppKit hook instance.
-    """
-
-    """
-    print((prefs['default']['ads_token']))
-    print(article_identifier)
     """
 
     if 'true' in prefs['options']['alert_sound'].lower():
@@ -210,21 +186,19 @@ def process_token(article_identifier, prefs, bibdesk):
     #       https://github.com/andycasey/ads/pull/109
     #   however, a change in ads() is required and the abstract field from the "bibtexabs" option doesn't
     #   always comply with the tex syntax.
-    if use_bibtexabs == True:
+    if use_bibtexabs:
         ads_bibtex = ads.ExportQuery(
             bibcodes=ads_article.bibcode, format='bibtexabs').execute()
     else:
         ads_bibtex = ads.ExportQuery(
             bibcodes=ads_article.bibcode, format='bibtex').execute()
 
-    logger.debug(">>>API limits")
-    logger.debug("   {}".format(ads_query.response.get_ratelimits()))
-    logger.debug(">>>ads_bibtex")
-    logger.debug("   {}".format(ads_bibtex))
+    logger.debug("API limits {}".format(ads_query.response.get_ratelimits()))
+    logger.debug("ADS_BIBTEX:")
+    logger.debug("{}".format(ads_bibtex))
 
     for k, v in ads_article.items():
-        logger.debug('>>>{}'.format(k))
-        logger.debug('   {}'.format(v))
+        logger.debug('article/{} {}'.format(k, v))
 
     article_bibcode = ads_article.bibcode
     article_esources = ads_article.esources
@@ -369,12 +343,12 @@ def process_pdf(article_bibcode, article_esources,
 
         if esource_type.upper() not in article_esources:
             continue
-        
+
         esource_url = get_esource_link(
             article_bibcode, esource_type=esource_type)
 
         if esource_type == 'pub_html':
-            logger.debug("try >>> {}".format(esource_url))
+            logger.debug("try: {}".format(esource_url))
             response = requests.get(esource_url, allow_redirects=True,
                                     headers={'User-Agent':
                                              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
@@ -384,7 +358,7 @@ def process_pdf(article_bibcode, article_esources,
         else:
             pdf_url = esource_url
 
-        logger.debug("try >>> {}".format(pdf_url))
+        logger.debug("try: {}".format(pdf_url))
         response = requests.get(pdf_url, allow_redirects=True,
                                 headers={'User-Agent':
                                          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 \
@@ -418,12 +392,12 @@ def get_pdf_fromhtml(response):
     guess the PDF link from the journal article html url, only works for some journals
     """
     url_html = response.url
-    
+
     url_pdf = url_html+'.pdf'
-    
+
     tree = html.fromstring(response.content)
     citation_pdf_url = tree.xpath("//meta[@name='citation_pdf_url']/@content")
-    if  len(citation_pdf_url) != 0:
+    if len(citation_pdf_url) != 0:
         url_pdf = citation_pdf_url[0]
 
     if 'annualreviews.org' in url_html:
@@ -431,8 +405,8 @@ def get_pdf_fromhtml(response):
 
     if 'link.springer.com' in url_html:
         url_pdf = url_html.replace(
-            'book', 'content/pdf').replace('article', 'content/pdf')+'.pdf'        
-    
+            'book', 'content/pdf').replace('article', 'content/pdf')+'.pdf'
+
     return url_pdf
 
 
@@ -507,8 +481,7 @@ def notify(title, subtitle, desc, alert_sound='Frog'):
     """
     try:
 
-        from Foundation import NSUserNotification
-        from Foundation import NSUserNotificationCenter
+        from Foundation import NSUserNotification, NSUserNotificationCenter
 
         notification = NSUserNotification.alloc().init()
         center = NSUserNotificationCenter.defaultUserNotificationCenter()

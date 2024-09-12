@@ -5,16 +5,12 @@ from configparser import ConfigParser, ExtendedInterpolation
 class Preferences(object):
 
     def __init__(self):
-        """
-        """
-
+        """Construct a Preferences object."""
         self.prefs_path = os.path.expanduser('~/.ads/ads2bibdesk.cfg')
         self.log_path = os.path.expanduser('~/.ads/ads2bibdesk.log')
         self.prefs = self._get_prefs()
 
     def _get_prefs(self):
-        """
-        """
 
         prefs = ConfigParser(interpolation=ExtendedInterpolation())
         prefs.read_string("""
