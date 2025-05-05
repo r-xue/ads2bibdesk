@@ -4,7 +4,6 @@ import logging
 import os
 import subprocess
 import textwrap
-from typing import Union, Tuple
 
 import AppKit  # installed from pyobjc-framework-Cocoa
 
@@ -23,7 +22,7 @@ class BibDesk(object):
         self.refresh()
 
     def __call__(self, cmd, pid=None, condition=None, include_error=False, to_strlist=False):
-        """Run an AppleScript command on the first document of BibDesk
+        """Run an AppleScript command on the first document of BibDesk.
 
         Args:
             cmd (str): AppleScript command string
@@ -38,7 +37,6 @@ class BibDesk(object):
             Union[AppleEventDescriptor, Tuple[AppleEventDescriptor, Any]]: Result of the AppleScript command.
                 If include_error is True, returns a tuple containing the AppleEventDescriptor and anycode  error encountered.
         """
-
         # Construct the AppleScript command
         select_cmd = ['tell first document of application "BibDesk" to']
 
@@ -303,8 +301,7 @@ class BibDesk(object):
     @staticmethod
     def has_annotations(f):
         """Check if a PDF file has annotations."""
-
-        cmd = "strings {} | grep  -E 'Contents[ ]{{0,1}}\('".format(f)
+        cmd = r"strings {} | grep  -E 'Contents[ ]{{0,1}}\('".format(f)
         check1_annotated_content = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                                     stderr=open('/dev/null', 'w')).stdout.read() != b''
 

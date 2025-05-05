@@ -111,7 +111,7 @@ class InstallCommand(install):
                 os.system('cp -rf '+tmppath.replace(' ', '\ ') +
                           ' '+downloads_system)
 
-            with open(os.path.expanduser(os.path.join(downloads_system, "Add to BibDesk.scpt")),'w') as scpt:
+            with open(os.path.expanduser(os.path.join(downloads_system, "Add to BibDesk.scpt")), 'w') as scpt:
                 scpt.write('set savedClipboard to the clipboard\n')
                 scpt.write('do shell script ("{} -d " & savedClipboard)\n'.format(cl_path))
 
@@ -141,7 +141,7 @@ setup(
     entry_points={'console_scripts': [
         'ads2bibdesk = ads2bibdesk.ads2bibdesk:main']},
     python_requires='>=3.8, <4',
-    install_requires=['ads', 'requests', 'lxml', 'pyobjc-framework-Cocoa'],
+    install_requires=['ads>=0.12.7', 'requests', 'lxml', 'pyobjc-framework-Cocoa'],
     project_urls={'Bug Reports': 'https://github.com/r-xue/ads2bibdesk/issues',
                   'Source': 'https://github.com/r-xue/ads2bibdesk/'},
     cmdclass={'install': InstallCommand}

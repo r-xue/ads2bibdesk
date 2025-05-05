@@ -188,15 +188,15 @@ def update_arxiv(daterange, prefs):
 
     from_date = daterange_list[0]
     to_date = daterange_list[1]
-    assert from_date == '' or re.match('^\d{2}/\d{2}$', from_date) is not None, \
+    assert from_date == '' or re.match(r'^\d{2}/\d{2}$', from_date) is not None, \
         'the start month/year needs to be specified in a MM/YY format'
-    assert to_date == '' or re.match('^\d{2}/\d{2}$', to_date) is not None, \
+    assert to_date == '' or re.match(r'^\d{2}/\d{2}$', to_date) is not None, \
         'the end month/year range needs to be specified in a MM/YY format'
 
     def b2d(bibtex):
         """BibTex -> publication date"""
-        m = re.search('month = \{?(\w*)\}?', bibtex).group(1)
-        y = re.search('year = \{?(\d{4})\}?', bibtex).group(1)
+        m = re.search(r'month = \{?(\w*)\}?', bibtex).group(1)
+        y = re.search(r'year = \{?(\d{4})\}?', bibtex).group(1)
         return datetime.datetime.strptime(m + y, '%b%Y')
 
     def recent(added, fdate, tdate):
